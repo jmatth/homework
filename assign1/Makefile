@@ -3,7 +3,9 @@
 ######################################
 
 COMPILER = gcc
-CCFLAGS  = -ansi -pedantic -Wall
+# CCFLAGS  = -ansi -pedantic -Wall
+CCFLAGS  = -Wall
+
 all: prefixStat
 
 debug:
