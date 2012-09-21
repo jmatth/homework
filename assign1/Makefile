@@ -23,3 +23,4 @@ endif
 clean:
 	rm -f prefixStat
 	rm -f *.o
+	rm -f *.gch
