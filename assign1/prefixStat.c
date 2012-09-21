@@ -4,11 +4,10 @@
 
 int main(int argc, const char *argv[])
 {
-	char action = readArgs(argc, argv);
 
-	if (action == 'h') {
+	if (readArgs(argc, argv)) {
 		printHelp();
-		return 0;
+		return 1;
 	}
 
 	//load the file specified at the command line
@@ -20,7 +19,7 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	switch(action)
+	switch(argv[1][1])
 	{
 		case 'w' :
 			//code here
@@ -33,13 +32,13 @@ int main(int argc, const char *argv[])
 	return 0;
 }
 
-char readArgs(int argc, const char *argv[])
+int readArgs(int argc, const char *argv[])
 {
 	//check for too many arguments, call user an idiot
 	if (argc != 3)
 	{
 		printf("Wrong number of arguments.\n");
-		return 'h';
+		return 1;
 	}
 
 	//error if we have flags that are more
@@ -47,32 +46,22 @@ char readArgs(int argc, const char *argv[])
 	if (strlen(argv[1]) > 2)
 	{
 		printf("Long argument.\n");
-		return 'h';
+		return 1;
 	}
 
 	//make sure the flags are correct
 	if(argv[1][0] != '-')
 	{
 		printf("Invalid flag. No '-'.\n");
-		return 'h';
+		return 1;
 	}
-
-	switch(argv[1][1])
+	
+	if(argv[1][1] != 'w' && argv[1][1] != 'l' && argv[1][1] != 'p' && argv[1][1] != 'h')
 	{
-		case 'w' :
-			return 'w';
-			break;
-		case 'l' :
-			return 'l';
-			break;
-		case 'p' :
-			return 'p';
-			break;
-		default :
-			printf("Invalid flag.\n");
-			return 'h';
-			break;
+		printf("Invalid flag.\n");
+		return 1;
 	}
+	return 0;
 }
 
 void printHelp() {
