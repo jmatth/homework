@@ -5,6 +5,31 @@
 int main(int argc, const char *argv[])
 {
 	char action = readArgs(argc, argv);
+
+	if (action == 'h') {
+		printHelp();
+		return 0;
+	}
+
+	//load the file specified at the command line
+	FILE *file = fopen(argv[2], "r");
+
+	//error out if the file didn't open
+	if (file == NULL) {
+		printf("File not found or not readable.\n");
+		return 1;
+	}
+
+	switch(action)
+	{
+		case 'w' :
+			//code here
+			break;
+		default :
+			printf("Well something got really fucked.\n");
+			break;
+	}
+
 	return 0;
 }
 
@@ -48,4 +73,13 @@ char readArgs(int argc, const char *argv[])
 			return 'h';
 			break;
 	}
+}
+
+void printHelp() {
+	printf("Usage: prefixStat <options> <file>\n");
+	printf("Options:\n");
+	printf("\t-h:\tPrint this help message and exit.\n");
+	printf("\t-l:\tPrint line count.\n");
+	printf("\t-p:\tFind words starting with a prefix.\n");
+	printf("\t-w:\tPrint word count.\n");
 }
