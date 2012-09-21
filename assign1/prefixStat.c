@@ -11,8 +11,8 @@ int main(int argc, const char *argv[])
 int readArgs(int argc, const char *argv[])
 {
 	//check for too many arguments, call user an idiot
-	if (argc > 4) {
-		printf("Too many arguments\n");
+	if (argc != 3) {
+		printf("Wrong number of arguments.\n");
 		return 1;
 	}
 
@@ -25,26 +25,26 @@ int readArgs(int argc, const char *argv[])
 			//than 2 characters long
 			if (strlen(argv[i]) > 2) {
 				printf("Long argument.\n");
-				return 1;
+				return 0;
 			}
 			//make sure the flags are correct
 			if(argv[i][0] != '-'){
 				printf("Invalid flag. No '-'.\n");
-				return 1
+				return 0;
 			}
 			switch(argv[i][1])
 			{
-				case 'h' :
+				case 'w' :
 					return 2;
 					break;
-				case 'w' :
-					//some code here
-					break;
 				case 'l' :
-					//some more code
+					return 3;
 					break;
 				case 'p' :
-					//last bit here
+					return 1;
+					break;
+				default :
+					return 0;
 					break;
 			}
 		}
