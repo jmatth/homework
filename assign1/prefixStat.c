@@ -21,7 +21,16 @@ int main(int argc, const char *argv[])
 
 	switch(argv[1][1])
 	{
+		case 'h' :
+			printHelp();
+			break;
 		case 'w' :
+			//code here
+			break;
+		case 'l' :
+			//code here
+			break;
+		case 'p' :
 			//code here
 			break;
 		default :
