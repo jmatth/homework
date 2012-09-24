@@ -28,7 +28,7 @@ int main(int argc, const char *argv[])
 			//code here
 			break;
 		case 'l' :
-			//code here
+			lineCount(file);
 			break;
 		case 'p' :
 			//code here
@@ -70,6 +70,11 @@ int readArgs(int argc, const char *argv[])
 		printf("Invalid flag.\n");
 		return 1;
 	}
+	return 0;
+}
+
+int lineCount(FILE *file){
+	printf("Counting lines.\n");
 	return 0;
 }
 
