@@ -11,7 +11,8 @@ int main(int argc, const char *argv[])
 	}
 
 	//load the file specified at the command line
-	FILE *file = fopen(argv[2], "r");
+	FILE *file;
+	file = fopen(argv[2], "r");
 
 	//error out if the file didn't open
 	if (file == NULL) {
@@ -75,6 +76,16 @@ int readArgs(int argc, const char *argv[])
 
 int lineCount(FILE *file){
 	printf("Counting lines.\n");
+	
+	//create a buffer
+	char buff[1024];
+
+	//and a counter
+	int count = 0;
+	while (fgets(buff, 1024, file)) {
+		++count;
+	}
+	printf("%d lines in file.\n",count);
 	return 0;
 }
 
