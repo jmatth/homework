@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "prefixStat.h"
 
 int main(int argc, const char *argv[])
@@ -86,10 +87,10 @@ int wordCount(FILE *file)
 
 	buff = fgetc(file);
 	while (buff != EOF) {
-		if (buff != ' ' && buff != '\t' && buff != '\n') {
+		if (!isspace(buff)) {
 			++count;
 			buff = fgetc(file);
-			while (buff != ' ' && buff != '\t' && buff != '\n' && buff != EOF) {
+			while (!isspace(buff) && buff != EOF) {
 				buff = fgetc(file);
 			}
 		}else {
