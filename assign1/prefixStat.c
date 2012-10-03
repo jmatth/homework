@@ -78,12 +78,17 @@ int lineCount(FILE *file){
 	printf("Counting lines.\n");
 	
 	//create a buffer
-	char buff[1024];
+	char buff;
 
 	//and a counter
 	int count = 0;
-	while (fgets(buff, 1024, file)) {
-		++count;
+
+	buff = fgetc(file);
+	while (buff != EOF) {
+		if (buff == '\n') {
+			++count;
+		}
+		buff = fgetc(file);
 	}
 	printf("%d lines in file.\n",count);
 	return 0;
