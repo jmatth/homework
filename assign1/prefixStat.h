@@ -7,5 +7,10 @@ int readArgs(int argc, const char *argv[]);
 //already loaded into memory
 int lineCount(FILE *file);
 
+//count the number of words in the file
+//takes the memory address of the file
+//already loaded into memory
+int wordCount(FILE *file);
+
 //print help message
 void printHelp();

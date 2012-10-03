@@ -26,7 +26,7 @@ int main(int argc, const char *argv[])
 			printHelp();
 			break;
 		case 'w' :
-			//code here
+			wordCount(file);
 			break;
 		case 'l' :
 			lineCount(file);
@@ -71,6 +71,32 @@ int readArgs(int argc, const char *argv[])
 		printf("Invalid flag.\n");
 		return 1;
 	}
+	return 0;
+}
+
+int wordCount(FILE *file)
+{
+	printf("Counting lines.\n");
+
+	//create a buffer
+	char buff;
+
+	//and a counter
+	int count = 0;
+
+	buff = fgetc(file);
+	while (buff != EOF) {
+		if (buff != ' ' && buff != '\t' && buff != '\n') {
+			++count;
+			buff = fgetc(file);
+			while (buff != ' ' && buff != '\t' && buff != '\n' && buff != EOF) {
+				buff = fgetc(file);
+			}
+		}else {
+			buff = fgetc(file);
+		}
+	}
+	printf("%d words in file.\n",count);
 	return 0;
 }
 
