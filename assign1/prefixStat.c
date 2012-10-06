@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "prefixStat.h"
@@ -45,6 +46,9 @@ int main(int argc, char *argv[])
 			break;
 	}
 
+	//doing things the Right Way (TM)
+	fclose(file);
+
 	return 0;
 }
 
@@ -82,8 +86,6 @@ int readArgs(int argc, char *argv[])
 
 int wordCount(FILE *file)
 {
-	printf("Counting lines.\n");
-
 	//create a buffer
 	char buff;
 
@@ -93,16 +95,19 @@ int wordCount(FILE *file)
 	buff = fgetc(file);
 	while (buff != EOF) {
 		if (!isspace(buff)) {
+			printf("%c",buff);
 			++count;
 			buff = fgetc(file);
 			while (!isspace(buff) && buff != EOF) {
+				printf("%c",buff);
 				buff = fgetc(file);
 			}
+			printf(" ");
 		}else {
 			buff = fgetc(file);
 		}
 	}
-	printf("%d words in file.\n",count);
+	printf("\n%d\n",count);
 	return 0;
 }
 
@@ -129,6 +134,11 @@ int lineCount(FILE *file)
 
 int findPrefix(FILE *file, char string[])
 {
+	//allocate a buffer the same
+	//size as the string
+	int stringLen = strlen(string);
+	char buff[stringLen];
+
 	return 0;
 }
 
