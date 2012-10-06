@@ -1,6 +1,6 @@
 #include <stdio.h>
 //check the command line arguments
-int readArgs(int argc, const char *argv[]);
+int readArgs(int argc, char *argv[]);
 
 //count the number of lines in the file
 //takes the memory address of the file
@@ -11,6 +11,8 @@ int lineCount(FILE *file);
 //takes the memory address of the file
 //already loaded into memory
 int wordCount(FILE *file);
+
+int findPrefix(FILE *file, char prefix[]);
 
 //print help message
 void printHelp();

@@ -3,9 +3,11 @@
 #include <ctype.h>
 #include "prefixStat.h"
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
 
+	//if readargs returns an error, print
+	//the help message and exit
 	if (readArgs(argc, argv)) {
 		printHelp();
 		return 1;
@@ -13,14 +15,17 @@ int main(int argc, const char *argv[])
 
 	//load the file specified at the command line
 	FILE *file;
-	file = fopen(argv[2], "r");
+	if (argv[1][1] != 'p') {
+		file = fopen(argv[2], "r");
+	}else{
+		file = fopen(argv[3], "r");
+	}
 
 	//error out if the file didn't open
 	if (file == NULL) {
 		printf("File not found or not readable.\n");
 		return 1;
 	}
-
 	switch(argv[1][1])
 	{
 		case 'h' :
@@ -33,7 +38,7 @@ int main(int argc, const char *argv[])
 			lineCount(file);
 			break;
 		case 'p' :
-			//code here
+			findPrefix(file, argv[2]);
 			break;
 		default :
 			printf("Well something got really fucked.\n");
@@ -43,10 +48,10 @@ int main(int argc, const char *argv[])
 	return 0;
 }
 
-int readArgs(int argc, const char *argv[])
+int readArgs(int argc, char *argv[])
 {
 	//check for too many arguments, call user an idiot
-	if (argc != 3)
+	if ((argc != 3 && argv[1][1] != 'p') || (argc != 4 && argv[1][1] == 'p'))
 	{
 		printf("Wrong number of arguments.\n");
 		return 1;
@@ -101,7 +106,8 @@ int wordCount(FILE *file)
 	return 0;
 }
 
-int lineCount(FILE *file){
+int lineCount(FILE *file)
+{
 	printf("Counting lines.\n");
 	
 	//create a buffer
@@ -121,11 +127,16 @@ int lineCount(FILE *file){
 	return 0;
 }
 
+int findPrefix(FILE *file, char string[])
+{
+	return 0;
+}
+
 void printHelp() {
 	printf("Usage: prefixStat <options> <file>\n");
 	printf("Options:\n");
 	printf("\t-h:\tPrint this help message and exit.\n");
 	printf("\t-l:\tPrint line count.\n");
-	printf("\t-p:\tFind words starting with a prefix.\n");
+	printf("\t-p <prefix>:\tFind words starting with the string <prefix>.\n");
 	printf("\t-w:\tPrint word count.\n");
 }
