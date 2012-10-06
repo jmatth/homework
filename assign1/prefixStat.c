@@ -113,8 +113,6 @@ int wordCount(FILE *file)
 
 int lineCount(FILE *file)
 {
-	printf("Counting lines.\n");
-	
 	//create a buffer
 	char buff;
 
@@ -126,18 +124,72 @@ int lineCount(FILE *file)
 		if (buff == '\n') {
 			++count;
 		}
+		printf("%c",buff);
 		buff = fgetc(file);
 	}
-	printf("%d lines in file.\n",count);
+	printf("%d\n",count);
 	return 0;
 }
 
-int findPrefix(FILE *file, char string[])
+int findPrefix(FILE *file, char prefix[])
 {
-	//allocate a buffer the same
-	//size as the string
-	int stringLen = strlen(string);
-	char buff[stringLen];
+	//create a buffer
+	char buff;
+
+	//and a counter
+	int count = 0;
+
+	//current index in the prefix
+	int index = 0;
+
+	//store the lenght of
+	//the prefix prefix
+	int prelen = strlen(prefix);
+
+	//see if we need to print a
+	//space or not
+	short int first = 1;
+
+	buff = fgetc(file);
+
+	while (buff != EOF) {
+		if (isspace(buff)) {
+			buff = fgetc(file);
+			continue;
+		}
+
+		if (buff == prefix[index]) {
+			buff = fgetc(file);
+			++index;
+		}else {
+			index = 0;
+			while (!isspace(buff) && buff != EOF) {
+				buff = fgetc(file);
+			}
+			continue;
+		}
+
+		//we've gone over, so the prefix
+		//matches. print the word and reset
+		//the index
+		if (index >= prelen) {
+			++count;
+			if (first) {
+				printf("%s", prefix);
+				first = 0;
+			}else{
+				printf(" %s", prefix);
+			}
+
+			while(!isspace(buff) && buff != EOF){
+				printf("%c", buff);
+				buff = fgetc(file);
+			}
+			index = 0;
+		}
+	}
+
+	printf("\n%d\n",count);
 
 	return 0;
 }
@@ -145,8 +197,8 @@ int findPrefix(FILE *file, char string[])
 void printHelp() {
 	printf("Usage: prefixStat <options> <file>\n");
 	printf("Options:\n");
-	printf("\t-h:\tPrint this help message and exit.\n");
-	printf("\t-l:\tPrint line count.\n");
+	printf("\t-h:\t\tPrint this help message and exit.\n");
+	printf("\t-l:\t\tPrint line count.\n");
 	printf("\t-p <prefix>:\tFind words starting with the string <prefix>.\n");
-	printf("\t-w:\tPrint word count.\n");
+	printf("\t-w:\t\tPrint word count.\n");
 }
