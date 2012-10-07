@@ -119,14 +119,30 @@ int lineCount(FILE *file)
 	//and a counter
 	int count = 0;
 
+	//check to fix eol errors.
+	//some systems automatically add
+	//an eol at the end of a file, others
+	//don't. to fix this we keep track of
+	//wheather the file ended in an eol
+	short int notEmpty=0, endLine=0;
+
 	buff = fgetc(file);
 	while (buff != EOF) {
+		if(!notEmpty)notEmpty=1;
 		if (buff == '\n') {
+			endLine = 1;
 			++count;
+		}else {
+			endLine = 0;
 		}
 		printf("%c",buff);
 		buff = fgetc(file);
 	}
+	if(!endLine) {
+		++count;
+		printf("\n");
+	}
+
 	printf("%d\n",count);
 	return 0;
 }
