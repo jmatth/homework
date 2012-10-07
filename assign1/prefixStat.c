@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
 	//error out if the file didn't open
 	if (file == NULL) {
-		printf("File not found or not readable.\n");
+		fprintf(stderr, "File not found or not readable.\n");
 		return 1;
 	}
 	switch(argv[1][1])
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 			findPrefix(file, argv[2]);
 			break;
 		default :
-			printf("Well something got really fucked.\n");
+			fprintf(stderr, "An unknown error occurred.\n");
 			break;
 	}
 
@@ -57,7 +57,7 @@ int readArgs(int argc, char *argv[])
 	//check for wrong number of arguments, call user an idiot
 	if ((argc < 2) || (argc != 3 && argv[1][1] != 'p') || (argc != 4 && argv[1][1] == 'p'))
 	{
-		printf("Wrong number of arguments.\n");
+		fprintf(stderr, "Wrong number of arguments.\n");
 		return 1;
 	}
 
@@ -65,20 +65,20 @@ int readArgs(int argc, char *argv[])
 	//than 2 characters long
 	if (strlen(argv[1]) > 2)
 	{
-		printf("Long argument.\n");
+		fprintf(stderr, "invalid argument.\n");
 		return 1;
 	}
 
 	//make sure the flags are correct
 	if(argv[1][0] != '-')
 	{
-		printf("Invalid flag. No '-'.\n");
+		fprintf(stderr, "Invalid flag. No '-'.\n");
 		return 1;
 	}
 	
 	if(argv[1][1] != 'w' && argv[1][1] != 'l' && argv[1][1] != 'p' && argv[1][1] != 'h')
 	{
-		printf("Invalid flag.\n");
+		fprintf(stderr, "Invalid flag.\n");
 		return 1;
 	}
 	return 0;
@@ -124,11 +124,10 @@ int lineCount(FILE *file)
 	//an eol at the end of a file, others
 	//don't. to fix this we keep track of
 	//wheather the file ended in an eol
-	short int notEmpty=0, endLine=0;
+	short int endLine=0;
 
 	buff = fgetc(file);
 	while (buff != EOF) {
-		if(!notEmpty)notEmpty=1;
 		if (buff == '\n') {
 			endLine = 1;
 			++count;
@@ -166,8 +165,6 @@ int findPrefix(FILE *file, char prefix[])
 	//actually appears in the word
 	char verbatimBuff[prelen+1];
 	verbatimBuff[prelen] = '\0';
-
-	//printf("prelen is %d, vb is %d long.\n", prelen, (int)strlen(verbatimBuff));
 
 	//see if we need to print a
 	//space or not
