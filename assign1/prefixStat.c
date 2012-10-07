@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
 
 int readArgs(int argc, char *argv[])
 {
-	//check for too many arguments, call user an idiot
-	if ((argc != 3 && argv[1][1] != 'p') || (argc != 4 && argv[1][1] == 'p'))
+	//check for wrong number of arguments, call user an idiot
+	if ((argc < 2) || (argc != 3 && argv[1][1] != 'p') || (argc != 4 && argv[1][1] == 'p'))
 	{
 		printf("Wrong number of arguments.\n");
 		return 1;
@@ -162,6 +162,13 @@ int findPrefix(FILE *file, char prefix[])
 	//the prefix prefix
 	int prelen = strlen(prefix);
 
+	//store the prefix as it
+	//actually appears in the word
+	char verbatimBuff[prelen+1];
+	verbatimBuff[prelen] = '\0';
+
+	//printf("prelen is %d, vb is %d long.\n", prelen, (int)strlen(verbatimBuff));
+
 	//see if we need to print a
 	//space or not
 	short int first = 1;
@@ -174,7 +181,9 @@ int findPrefix(FILE *file, char prefix[])
 			continue;
 		}
 
-		if (buff == prefix[index]) {
+		//if (buff == prefix[index]) {
+		if (charCaseComp(&buff, &prefix[index])) {
+			verbatimBuff[index] = buff;
 			buff = fgetc(file);
 			++index;
 		}else {
@@ -191,10 +200,10 @@ int findPrefix(FILE *file, char prefix[])
 		if (index >= prelen) {
 			++count;
 			if (first) {
-				printf("%s", prefix);
+				printf("%s", verbatimBuff);
 				first = 0;
 			}else{
-				printf(" %s", prefix);
+				printf(" %s", verbatimBuff);
 			}
 
 			while(!isspace(buff) && buff != EOF){
@@ -217,4 +226,28 @@ void printHelp() {
 	printf("\t-l:\t\tPrint line count.\n");
 	printf("\t-p <prefix>:\tFind words starting with the string <prefix>.\n");
 	printf("\t-w:\t\tPrint word count.\n");
+}
+
+int charCaseComp (char *one, char *two) {
+
+	//just check for equivalence first
+	if (*one == *two) {
+		return 1;
+	}
+
+	//they're not equal. if they're letters
+	//then check if they're just different
+	//cases
+	if (*one >= 'A' && *one <= 'Z') {
+		if (*one + 32 == *two ) {
+			return 1;
+		}
+	} else if (*one >= 'a' && *one <= 'z') {
+		if (*one - 32 == *two) {
+			return 1;
+		}
+	}
+
+	//nothing worked, they don't match
+	return 0;
 }

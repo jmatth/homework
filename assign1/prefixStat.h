@@ -12,7 +12,12 @@ int lineCount(FILE *file);
 //already loaded into memory
 int wordCount(FILE *file);
 
+//find the all words in file that start with
+//prefix, ignoring case.
 int findPrefix(FILE *file, char prefix[]);
+
+// compare two ASCII characters ignoring case
+int charCaseComp(char *one, char *two);
 
 //print help message
 void printHelp();
