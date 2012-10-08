@@ -11,25 +11,44 @@
 \noindent prefixStat
 
 \section{Design}
-When the program runs it goes through two distinct stages. It first checks the arguments provided to make sure it was invoked properly, and errors out if it finds something wrong. Assuming the input is valid (meaning the flags provided are valid and the file specified actually exists), it proceeds to run a different function depending on which flag was specified.
+When called, the program reads the arguments provided at the command line, exits with an error message and help text if the arguments are invalid. It then attempts to load the file test.dat and again exits with an error if this does not exist. From there a different action is taken depending on the options specified at the command line.
 
-\section{Functions}
-\subsection{readArgs:}
-Processes the arguments specified at the command line, and reports any errors via stderr. Contains several if statements, but never loops, and runs in O(1) time.
+\subsection{Line Count}
+If a line count is specified, then the file is read into a buffer one character at a time and a counter is incrimented each time a newline is encountered. At the end of the loop, the counter is incremented one more time if the file was not found to end in a newline, and the count is printed.
 
-\subsection{wordCount:}
-This function is run if the -w flag is specified at the command line. It uses a single character buffer and an int as a counter. At the start of the function it loads the first character of the file into the buffer and then drops into a while loop until the buffer is loaded with EOF. The loop first uses a nested loop to skip over any white space characters until the buffer contains the first non-whitespace character, i.e. the first character of the first word in the file. It then increments the counter and uses another nested loop to skip over the remainder of the word until it finds more whitespace. The outer loop then repeats searching for the next word or exiting if it finds EOF. The entire function uses only one char and one int, plus the file that is already loaded into memory. Although there are nested loops, they never repeat over the same data. The function therefore runs in O(n) time, where n is the length of the file being read.
+\subsection{Word Count}
+If word count is specified, the file is read into a buffer one character at a time. Whenever a non-whitespace character is encountered, a counter is incremented and the program begins looking for whitepace characters. Once one is encountered, the entire loop repeats until it encounters EOF.
+Once the loop exits the count is printed.
 
-\subsection{lineCount:}
-This function is run if the -l flag is specified at the command line. Like word count, it uses a char as a buffer and int as a counter, plus a short into to act as a boolean to solve an edge case discusses below. The function uses a while loop to load characters one at a time from the file and check if they are a newline, incrementing the counter if one is found. An edge case that must be considered is whether or not the file ends with a newline character. Most *NIX editors add this in, while other systems may not, which would result in the count being one less than it should be. To solve this, a short int is used as a boolean to keep track of whether the last character read was a newline. When the loop exits, this value is checked before printing the count. If it is 1 (true), then the count is printed as is. Otherwise, the count is incremented and an extra newline is printed to fix the output formatting. Once again, the nested loops never repeat over the same data, and the function runs in O(n) time, where n is the length of the file being read.
+\subsection{Find Prefix}
+If a prefix is specified to be found, then the file is read into a buffer one character at a time. At each step it is compared to a character at the current index of the prefix. If the characters are found to be a case-insensitive match, then the index is incremented. Otherwise the index is reset and the rest of the word is skipped over until white space is found and the loop repeats. If the index exceeds the lenght of the prefix, then a match is determined to have been found. The matching string is printed, the index is reset, and the loop repeats. When the loop exits the count is printed.
 
-\subsection{findPrefix:}
-Like the previous functions, this one uses a char as a buffer and an int as a counter, plus a two char arrays the length of the prefix specified at the command line, and a short int as a boolean to adjust the formatting. Again like the others, the function performs a while loop until EOF, loading characters into the buffer one at a time. At each iteration it checks if the character in the buffer is the same as the one at the current index of the prefix string, using a helper method to make this comparison case insensitive. If the characters match then the index is incremented, and the current character is stored into an extra string buffer. If not then the index is reset and the loop continues. When the index is found to have exceeded the length of the prefix, then a match has been found. The extra buffer is printed, followed by the rest of the word remaining in the file, the counter is incremented and the index is reset. Once the loop exits the count is printed to the terminal. The nested loops never repeat over the same data, and the function runs in O(n), where n is the length of the file being read.
+\section{Efficiency}
+\subsection{Word Count}
+Big O: each character of the file is loaded into the buffer and examined only once. The efficiency is therefore O(n), where n is the length of the file being read. \\ \\
+Space: besides the memory needed to store the file, the function only uses: \\
+\begin{itemize}
+	\item 1 int: for counter.
+	\item 1 char: for buffer.
+\end{itemize}
 
-\subsection{caseCharComp:}
-Compares two ASCII characters, ignoring case. Contains several if statements but no loops, and runs it O(1) time.
+\subsection{Line count}
+Big O: each character of the file is loaded into the buffer and examined only once. The efficiency is therefore O(n), where n is the length of the file being read. \\ \\
+Space: besides the memory needed to store the file, the function uses: \\
+\begin{itemize}
+	\item 1 int: for counter.
+	\item 1 char: for buffer.
+	\item 1 short int: used as a boolean to check if the file ended in a newline.
+\end{itemize}
 
-\subsection{main:}
-Fist runs readArgs, and if that does not report an error, runs one of the other functions depending on the command line arguments. Given the efficiency of the other functions, this function can be concluded to run in O(n) time.
+\subsection{Find Prefix}
+Big O: each character is read into the buffer and examined. The loop never repeats over the same data. The efficiency is therefore O(n), where n is the lenght of the file being read. \\ \\
+Space: besides the memory needed to store the file, the function uses:
+\begin{itemize}
+	\item 3 ints: one for counter, one for the current index in the prefix, and one for the lenght of the prefix.
+	\item 1 char: for a buffer.
+	\item 1 char array: to store the prefix as it appears in each word for printing. The array is the same lenght as the prefix itself.
+	\item 1 short int: used as a boolean to check if the word being printed is the first one or not. This is needed to tell if a space needs to be added to the output or not.
+\end{itemize}
 
 \end{document}
