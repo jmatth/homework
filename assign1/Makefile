@@ -24,3 +24,6 @@ clean:
 	rm -f prefixStat
 	rm -f *.o
 	rm -f *.gch
+	rm -f *.aux
+	rm -f *.log
+	rm -f *.pdf
