@@ -14,13 +14,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	//load the file specified at the command line
+	//load the file
 	FILE *file;
-	if (argv[1][1] != 'p') {
-		file = fopen(argv[2], "r");
-	}else{
-		file = fopen(argv[3], "r");
-	}
+	file = fopen("test.dat", "r");
 
 	//error out if the file didn't open
 	if (file == NULL) {
@@ -55,7 +51,7 @@ int main(int argc, char *argv[])
 int readArgs(int argc, char *argv[])
 {
 	//check for wrong number of arguments, call user an idiot
-	if ((argc < 2) || (argc != 3 && argv[1][1] != 'p') || (argc != 4 && argv[1][1] == 'p'))
+	if ((argc < 2) || (argc != 2 && argv[1][1] != 'p') || (argc != 3 && argv[1][1] == 'p'))
 	{
 		fprintf(stderr, "Wrong number of arguments.\n");
 		return 1;
@@ -65,14 +61,14 @@ int readArgs(int argc, char *argv[])
 	//than 2 characters long
 	if (strlen(argv[1]) > 2)
 	{
-		fprintf(stderr, "invalid argument.\n");
+		fprintf(stderr, "Invalid argument.\n");
 		return 1;
 	}
 
 	//make sure the flags are correct
 	if(argv[1][0] != '-')
 	{
-		fprintf(stderr, "Invalid flag. No '-'.\n");
+		fprintf(stderr, "Invalid flag.\n");
 		return 1;
 	}
 	
