@@ -42,7 +42,7 @@ Space: besides the memory needed to store the file, the function uses: \\
 \end{itemize}
 
 \subsection{Find Prefix}
-Big O: each character is read into the buffer and examined. The loop never repeats over the same data. The efficiency is therefore O(n), where n is the lenght of the file being read. \\ \\
+Big O: each character is read into the buffer and examined. In this case, after the character is examined and determined to be no-whitespace, it may have to also be checked for a match against the prefix. In the worst case, this would happen at the first l characters of every word, where l is the number of characters in the prefix. The efficiency is therefore O(ln), where n is the lenght of the file being read and l is the lenght of the prefix. \\ \\
 Space: besides the memory needed to store the file, the function uses:
 \begin{itemize}
 	\item 3 ints: one for counter, one for the current index in the prefix, and one for the lenght of the prefix.
