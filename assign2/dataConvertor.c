@@ -73,8 +73,8 @@ char* d2b(char *input)
 		double decimal = strtof(after_dec, &end);
 		free(before_dec);
 		free(after_dec);
-		char *integer_string = get_integer(integer);
-		char *decimal_string = get_decimal(decimal);
+		char *integer_string = get_binary_integer(integer);
+		char *decimal_string = get_binary_decimal(decimal);
 		ret_str = (char*) malloc(strlen(integer_string) + strlen(decimal_string) + 2);
 		strcat(ret_str, integer_string);
 		strcat(ret_str, ".");
@@ -88,37 +88,37 @@ char* d2b(char *input)
 	return ret_str;
 }
 
-char* get_integer(int integer)
+char* get_binary_integer(int integer)
 {
-	char *binstr = (char*) malloc(9);
+	char binstr[27];
 	int i = 0;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 27; i++) {
 		binstr[i] = '0';
 	}
-	binstr[8] = '\0';
 
-	for (i = 0; i < 9; i++) {
-		if (integer - pow((double)2, (double)7-i) >= 0) {
+	for (i = 0; i < 27; i++) {
+		if (integer - pow((double)2, (double)26-i) >= 0) {
 			binstr[i] = '1';
-			integer = integer - pow((double)2, (double)7-i);
+			integer = integer - pow((double)2, (double)26-i);
 		}
 		if (integer == 0) {
 			break;
 		}
 	}
-	return binstr;
-
+	char *ret_binstr = (char*) malloc(i+2);
+	printf("%s\n", binstr);
+	strcpy(ret_binstr, binstr+i);
+	return ret_binstr;
 }
 
-char* get_decimal(double decimal)
+char* get_binary_decimal(double decimal)
 {
-	char *decstr = (char*) malloc(9);
+	char decstr[28];
 	int i;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 28; i++) {
 		decstr[i] = '0';
 	}
-	decstr[8] = '\0';
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 28; i++) {
 		if (decimal - pow(2, -(i+1)) >= 0) {
 			decstr[i] = '1';
 			decimal = decimal - pow(2, -(i+1)); 
@@ -127,8 +127,11 @@ char* get_decimal(double decimal)
 			break;
 		}
 	}
+	char *ret_decstr = (char*) malloc(i+2);
+	ret_decstr = strncat(ret_decstr, decstr, i+1);
+	ret_decstr[i+2] = '\0';
 
-	return decstr;
+	return ret_decstr;
 }
 
 void printHelp() {

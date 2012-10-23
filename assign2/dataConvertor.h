@@ -7,6 +7,6 @@ void printHelp();
 
 char* d2b(char *input);
 
-char* get_integer(int integer);
+char* get_binary_integer(int integer);
 
-char* get_decimal(double integer);
+char* get_binary_decimal(double integer);
