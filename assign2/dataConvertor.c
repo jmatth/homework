@@ -81,10 +81,13 @@ char* d2b(char *input)
 		strcat(ret_str, decimal_string);
 		free(integer_string);
 		free(decimal_string);
-		
-		
+	} else {
+		int integer = atoi(input);
+		ret_str = get_binary_integer(integer);
 	}
+
 	printf("%s\n", ret_str);
+	free(ret_str);
 	return ret_str;
 }
 
@@ -92,6 +95,8 @@ char* get_binary_integer(int integer)
 {
 	char binstr[27];
 	int i = 0;
+	int first_one = 0;
+	
 	for (i = 0; i < 27; i++) {
 		binstr[i] = '0';
 	}
@@ -100,14 +105,16 @@ char* get_binary_integer(int integer)
 		if (integer - pow((double)2, (double)26-i) >= 0) {
 			binstr[i] = '1';
 			integer = integer - pow((double)2, (double)26-i);
+			if (! first_one) {
+				first_one = i;
+			}
 		}
 		if (integer == 0) {
 			break;
 		}
 	}
-	char *ret_binstr = (char*) malloc(i+2);
-	printf("%s\n", binstr);
-	strcpy(ret_binstr, binstr+i);
+	char *ret_binstr = (char*) malloc(27-first_one+2);
+	strcpy(ret_binstr, binstr+first_one);
 	return ret_binstr;
 }
 
