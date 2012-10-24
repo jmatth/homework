@@ -5,6 +5,9 @@ int readArgs(int argc, char *argv[]);
 //print help message
 void printHelp();
 
+//converts decimal in string input
+//and returns the binary representation
+//as a string
 char* d2b(char *input);
 
 char* h2b(char *input);
