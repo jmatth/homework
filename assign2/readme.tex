@@ -11,8 +11,12 @@
 \noindent dataConvertor
 
 \section{Design}
-
+The program takes three arguments, and assuming everything was entered correctly, converts the input value to thw selected type of output.\\
+If conversion to the same format as the input is requested, then the input is simply printed as is and the program exits.\\
+However, if conversion between two different types is requested, the input value is first converted to a binary representation, and then to the requested output format.
 
 \section{Efficiency}
+During the conversion, the data may be itterated over several times. However, the number of itterations is always a specific ammount,
+and not related to the lenght of the input. The efficiency therefore simplifies to O(n), where n is the length of the input data.
 
 \end{document}
