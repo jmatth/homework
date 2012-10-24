@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	char *result = h2b(argv[2]);
+	char *result = o2b(argv[2]);
 	printf("%s\n", result);
 	free(result);
 
@@ -52,6 +52,40 @@ int readArgs(int argc, char *argv[])
 		return 1;
 	}
 	return 0;
+}
+
+char* o2b(char *input)
+{
+	char *binary = (char*) malloc(25);
+	binary[26] = '\0';
+	int i;
+	int curr_ptr = 0;
+
+	for (i = 0; i < strlen(input); i++) 
+	{
+		switch (toupper(input[i]))
+		{
+			case '.' :
+				strcpy(binary+curr_ptr, "."); curr_ptr++; break;
+			case '0' :
+				strcpy(binary+curr_ptr, "000"); curr_ptr+=3; break;
+			case '1' :
+				strcpy(binary+curr_ptr, "001"); curr_ptr+=3; break;
+			case '2' :
+				strcpy(binary+curr_ptr, "010"); curr_ptr+=3; break;
+			case '3' :
+				strcpy(binary+curr_ptr, "011"); curr_ptr+=3; break;
+			case '4' :
+				strcpy(binary+curr_ptr, "100"); curr_ptr+=3; break;
+			case '5' :
+				strcpy(binary+curr_ptr, "101"); curr_ptr+=3; break;
+			case '6' :
+				strcpy(binary+curr_ptr, "110"); curr_ptr+=3; break;
+			case '7' :
+				strcpy(binary+curr_ptr, "111"); curr_ptr+=3; break;
+		}
+	}
+	return binary;
 }
 
 char* h2b(char *input)

@@ -9,6 +9,8 @@ char* d2b(char *input);
 
 char* h2b(char *input);
 
+char* o2b(char *input);
+
 char* get_binary_integer(int integer);
 
 char* get_binary_decimal(double integer);
