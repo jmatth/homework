@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
 	printf("Hex to binary is %s\n", result);
 	char *more = b2h(result);
 	printf("Second result is %s\n", more);
-	free(result);
 
 	return 0;
 }
@@ -250,6 +249,7 @@ char* b2h(char *input)
 	}
 	else
 	{
+		char *hex = (char*) malloc(17);
 		int input_length = strlen(input);
 		printf("input length is %d\n", input_length);
 		int input_mod = 4 % input_length;
@@ -273,9 +273,12 @@ char* b2h(char *input)
 			printf("input_ptr is %s\n", input_ptr);
 		}
 
+
 		printf("fucking gremlins %s\n", input_ptr);
-		char *hex = (char*) malloc(17);
 		printf("fucking gremlins %s\n", input_ptr);
+
+
+
 		hex[18] = '\0';
 		hex[0] = '\0';
 		char curr_nibble[4];

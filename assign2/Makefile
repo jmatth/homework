@@ -4,7 +4,7 @@
 
 COMPILER = gcc
 # CCFLAGS  = -ansi -pedantic -Wall
-CCFLAGS  = -Wall -lm
+CCFLAGS  = -Wall -lm -g
 
 all: dataConvertor
 
