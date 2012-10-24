@@ -15,8 +15,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	char *result = o2b(argv[2]);
-	printf("%s\n", result);
+	char *result = h2b(argv[2]);
+	printf("Hex to binary is %s\n", result);
+	char *more = b2h(result);
 	free(result);
 
 	return 0;
@@ -52,6 +53,259 @@ int readArgs(int argc, char *argv[])
 		return 1;
 	}
 	return 0;
+}
+
+char* b2h(char *input)
+{
+	int i = 0;
+	signed int found_point = -1;
+
+	for (i = 0; i < strlen(input); i++) {
+		if(input[i] == '.')
+		{
+			found_point = i;
+			break;
+		}
+	}
+
+	if(found_point >= 0)
+	{
+		char before_point[found_point + 1];
+		strncpy(before_point, input, found_point);
+		char *before_point_ptr = before_point;
+
+		char after_point[strlen(input)-found_point+1];
+		strcpy(after_point, input+found_point+1);
+		char *after_point_ptr = after_point;
+
+		int before_point_len = strlen(before_point);
+		int before_point_mod = before_point_len % 4;
+		if(before_point_mod != 0)
+		{
+			char before_point_pad[before_point_mod + before_point_len];
+			for (i = 0; i < before_point_mod; i++) {
+				before_point_pad[i] = '0';
+			}
+			strcpy(before_point_pad+before_point_mod, before_point);
+			before_point_ptr = before_point_pad;
+		}
+
+		char before_point_hex[256];
+		char curr_nibble[4];
+		printf("Before Decimal binary is %s\n", before_point_ptr);
+		for (i = 0; i < strlen(before_point_ptr); i+=4) 
+		{
+			strncpy(curr_nibble, before_point_ptr+i, 4);
+
+			if(!strcmp(curr_nibble, "0000"))
+			{
+				strcat(before_point_hex, "0");
+			} else if (!strcmp(curr_nibble, "0001"))
+			{
+				strcat(before_point_hex, "1");
+			} else if (!strcmp(curr_nibble, "0010"))
+			{
+				strcat(before_point_hex, "2");
+			} else if (!strcmp(curr_nibble, "0011"))
+			{
+				strcat(before_point_hex, "3");
+			} else if (!strcmp(curr_nibble, "0100"))
+			{
+				strcat(before_point_hex, "4");
+			} else if (!strcmp(curr_nibble, "0101"))
+			{
+				strcat(before_point_hex, "5");
+			} else if (!strcmp(curr_nibble, "0110"))
+			{
+				strcat(before_point_hex, "6");
+			} else if (!strcmp(curr_nibble, "0111"))
+			{
+				strcat(before_point_hex, "7");
+			} else if (!strcmp(curr_nibble, "1000"))
+			{
+				strcat(before_point_hex, "8");
+			} else if (!strcmp(curr_nibble, "1001"))
+			{
+				strcat(before_point_hex, "9");
+			} else if (!strcmp(curr_nibble, "1010"))
+			{
+				strcat(before_point_hex, "A");
+			} else if (!strcmp(curr_nibble, "1011"))
+			{
+				strcat(before_point_hex, "B");
+			} else if (!strcmp(curr_nibble, "1100"))
+			{
+				strcat(before_point_hex, "C");
+			} else if (!strcmp(curr_nibble, "1101"))
+			{
+				strcat(before_point_hex, "D");
+			} else if (!strcmp(curr_nibble, "1110"))
+			{
+				strcat(before_point_hex, "E");
+			} else if (!strcmp(curr_nibble, "1111"))
+			{
+				strcat(before_point_hex, "F");
+			}
+
+
+		}
+
+		int after_point_len = strlen(after_point);
+		int after_point_mod = after_point_len % 4;
+		if(after_point_mod != 0)
+		{
+			char after_point_pad[after_point_mod + after_point_len];
+			for (i = after_point_mod + after_point_len - 1; i > after_point_mod; i--) 
+			{
+				after_point_pad[i] = '0';
+				strncpy(after_point_pad, after_point, after_point_len);
+				after_point_ptr = after_point_pad;
+			}
+		}
+
+		char after_point_hex[256];
+		for (i = 0; i < strlen(after_point_ptr); i+=4) 
+		{
+			strncpy(curr_nibble, after_point_ptr+i, 4);
+
+			if(!strcmp(curr_nibble, "0000"))
+			{
+				strcat(after_point_hex, "0");
+			} else if (!strcmp(curr_nibble, "0001"))
+			{
+				strcat(after_point_hex, "1");
+			} else if (!strcmp(curr_nibble, "0010"))
+			{
+				strcat(after_point_hex, "2");
+			} else if (!strcmp(curr_nibble, "0011"))
+			{
+				strcat(after_point_hex, "3");
+			} else if (!strcmp(curr_nibble, "0100"))
+			{
+				strcat(after_point_hex, "4");
+			} else if (!strcmp(curr_nibble, "0101"))
+			{
+				strcat(after_point_hex, "5");
+			} else if (!strcmp(curr_nibble, "0110"))
+			{
+				strcat(after_point_hex, "6");
+			} else if (!strcmp(curr_nibble, "0111"))
+			{
+				strcat(after_point_hex, "7");
+			} else if (!strcmp(curr_nibble, "1000"))
+			{
+				strcat(after_point_hex, "8");
+			} else if (!strcmp(curr_nibble, "1001"))
+			{
+				strcat(after_point_hex, "9");
+			} else if (!strcmp(curr_nibble, "1010"))
+			{
+				strcat(after_point_hex, "A");
+			} else if (!strcmp(curr_nibble, "1011"))
+			{
+				strcat(after_point_hex, "B");
+			} else if (!strcmp(curr_nibble, "1100"))
+			{
+				strcat(after_point_hex, "C");
+			} else if (!strcmp(curr_nibble, "1101"))
+			{
+				strcat(after_point_hex, "D");
+			} else if (!strcmp(curr_nibble, "1110"))
+			{
+				strcat(after_point_hex, "E");
+			} else if (!strcmp(curr_nibble, "1111"))
+			{
+				strcat(after_point_hex, "F");
+			}
+
+
+		}
+
+		printf("Before point is %s\nAfter point is %s\n", before_point_hex, after_point_hex);
+
+	}
+	else
+	{
+		int input_length = strlen(input);
+		int input_mod = input_length % 4;
+		char *input_ptr = input;
+
+		if(input_mod != 0)
+		{
+			char input_pad[input_length + input_mod];
+
+			for (i = 0; i < input_mod; i++) {
+				input_pad[i] = '0';
+			}
+			strcat(input_pad, input);
+			input_ptr = input_pad;
+		}
+
+		char hex[256];
+		char curr_nibble[4];
+		for (i = 0; i < strlen(input_ptr); i+=4) 
+		{
+			strncpy(curr_nibble, input_ptr+i, 4);
+
+			if(!strcmp(curr_nibble, "0000"))
+			{
+				strcat(hex, "0");
+			} else if (!strcmp(curr_nibble, "0001"))
+			{
+				strcat(hex, "1");
+			} else if (!strcmp(curr_nibble, "0010"))
+			{
+				strcat(hex, "2");
+			} else if (!strcmp(curr_nibble, "0011"))
+			{
+				strcat(hex, "3");
+			} else if (!strcmp(curr_nibble, "0100"))
+			{
+				strcat(hex, "4");
+			} else if (!strcmp(curr_nibble, "0101"))
+			{
+				strcat(hex, "5");
+			} else if (!strcmp(curr_nibble, "0110"))
+			{
+				strcat(hex, "6");
+			} else if (!strcmp(curr_nibble, "0111"))
+			{
+				strcat(hex, "7");
+			} else if (!strcmp(curr_nibble, "1000"))
+			{
+				strcat(hex, "8");
+			} else if (!strcmp(curr_nibble, "1001"))
+			{
+				strcat(hex, "9");
+			} else if (!strcmp(curr_nibble, "1010"))
+			{
+				strcat(hex, "A");
+			} else if (!strcmp(curr_nibble, "1011"))
+			{
+				strcat(hex, "B");
+			} else if (!strcmp(curr_nibble, "1100"))
+			{
+				strcat(hex, "C");
+			} else if (!strcmp(curr_nibble, "1101"))
+			{
+				strcat(hex, "D");
+			} else if (!strcmp(curr_nibble, "1110"))
+			{
+				strcat(hex, "E");
+			} else if (!strcmp(curr_nibble, "1111"))
+			{
+				strcat(hex, "F");
+			}
+
+
+		}
+		
+		printf("Hex is %s\n", hex);
+	}
+
+
+	return "bullshit";
+
 }
 
 char* o2b(char *input)
@@ -145,7 +399,8 @@ char* d2b(char *input)
 	int i = 0;
 	int point = -1;
 	char *ret_str;
-	for (i = 0; i < strlen(input); i++) {
+	for (i = 0; i < strlen(input); i++) 
+	{
 		if (input[i] == '.') {
 			point = i;
 			break;
