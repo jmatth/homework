@@ -23,6 +23,10 @@ int main(int argc, char *argv[])
 void driver(char inf, char *data, char outf)
 {
 	char *binary;
+	double dec;
+	int sub;
+	double diff;
+	int i;
 
 	if(inf == outf)
 	{
@@ -51,7 +55,17 @@ void driver(char inf, char *data, char outf)
 		case 'h' :
 			printf("%s\n", b2oh(binary, 4)); break;
 		case 'd' :
-			printf("%g\n", b2d(binary)); break;
+			dec = b2d(binary);
+			sub = (int) dec;
+			diff = dec - sub;
+			for (i = 0; i < 1000; i++) {
+				sub = diff * pow(10, i);
+				if(diff * pow(10, i) - sub <= 0)
+				{
+					break;
+				}
+			}
+			printf("%.*f\n", i, dec);
 	}
 }
 
