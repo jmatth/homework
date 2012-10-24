@@ -15,8 +15,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	//char *result = h2b(argv[2]);
-	char *result = "000";
+	char *result = argv[2];
 	printf("Hex to binary is %s\n", result);
 	char *more = b2h(result);
 	printf("Second result is %s\n", more);
@@ -72,12 +71,16 @@ char* b2h(char *input)
 	if(found_point >= 0)
 	{
 		printf("found point at %d\n", found_point);
-		char before_point[found_point];
+		char before_point[found_point+1];
 		before_point[found_point] = '\0';
 		strncpy(before_point, input, found_point);
 		printf("before point copies to %s\n", before_point);
 		char *before_point_ptr = before_point;
 		printf("ptr goes to %s\n", before_point_ptr);
+
+		char *hex_ret = (char*) malloc(32);
+		hex_ret[0] = '\0';
+		hex_ret[33] = '\0';
 
 		char after_point[strlen(input)-found_point+1];
 		strcpy(after_point, input+found_point+1);
@@ -85,9 +88,18 @@ char* b2h(char *input)
 
 		int before_point_len = strlen(before_point);
 		int before_point_mod = before_point_len % 4;
+
+		char before_point_pad[before_point_mod + before_point_len + 1];
+
+		int after_point_len = strlen(after_point);
+		int after_point_mod = after_point_len % 4;
+
+		char after_point_pad[after_point_mod + after_point_len];
+
 		if(before_point_mod != 0)
 		{
-			char before_point_pad[before_point_mod + before_point_len];
+			before_point_mod = 4 - before_point_mod;
+			printf("padding before point with %d\n", before_point_mod);
 			for (i = 0; i < before_point_mod; i++) {
 				before_point_pad[i] = '0';
 			}
@@ -161,12 +173,10 @@ char* b2h(char *input)
 		}
 		printf("i exited at %d\n", i);
 
-		int after_point_len = strlen(after_point);
-		int after_point_mod = after_point_len % 4;
 		if(after_point_mod != 0)
 		{
 			printf("needs padding\n");
-			char after_point_pad[after_point_mod + after_point_len];
+			after_point_mod = 4 - after_point_mod;
 			for (i = after_point_mod + after_point_len - 1; i > after_point_mod; i--) 
 			{
 				after_point_pad[i] = '0';
@@ -233,10 +243,6 @@ char* b2h(char *input)
 			}
 		}
 
-		char *hex_ret = (char*) malloc(32);
-		hex_ret[0] = '\0';
-		hex_ret[33] = '\0';
-
 		printf("before point comes to %s\n", before_point_hex);
 		printf("after point comes to %s\n", after_point_hex);
 		strcat(hex_ret, before_point_hex);
@@ -250,43 +256,43 @@ char* b2h(char *input)
 	else
 	{
 		char *hex = (char*) malloc(17);
+		hex[0] = '\0';
+		hex[16] = '\0';
 		int input_length = strlen(input);
 		printf("input length is %d\n", input_length);
-		int input_mod = 4 % input_length;
-		printf("input mod is %d\n", input_mod);
+		int input_mod = input_length % 4;
 		char *input_ptr = input;
+		char input_pad[input_length + input_mod + 1];
 
 		if(input_mod != 0)
 		{
 			printf("padding input.\n");
-			char input_pad[input_length + input_mod];
+			input_mod = 4 - input_mod;
+			printf("input mod is %d\n", input_mod);
 			input_pad[input_length + input_mod] = '\0';
-			input_pad[0] = '\0';
 
 			for (i = 0; i < input_mod; i++) {
 				input_pad[i] = '0';
 			}
+
 			input_pad[i] = '\0';
 			strcat(input_pad, input);
 			input_ptr = input_pad;
+
 			printf("input_pad is %s\n", input_pad);
 			printf("input_ptr is %s\n", input_ptr);
 		}
 
-
-		printf("fucking gremlins %s\n", input_ptr);
-		printf("fucking gremlins %s\n", input_ptr);
-
-
-
-		hex[18] = '\0';
-		hex[0] = '\0';
-		char curr_nibble[4];
+		char curr_nibble[5];
+		curr_nibble[4] = '\0';
 		for (i = 0; i < strlen(input_ptr); i+=4) 
 		{
 			printf("copying from %s\n", input_ptr);
+
 			strncpy(curr_nibble, input_ptr+i, 4);
+
 			curr_nibble[4] = '\0';
+
 			printf("curr nibble is %s\n", curr_nibble);
 
 			if(!strcmp(curr_nibble, "0000"))
