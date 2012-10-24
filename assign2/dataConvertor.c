@@ -15,7 +15,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	char *result = h2b(argv[2]);
+	//char *result = h2b(argv[2]);
+	char *result = "000";
 	printf("Hex to binary is %s\n", result);
 	char *more = b2h(result);
 	printf("Second result is %s\n", more);
@@ -251,28 +252,36 @@ char* b2h(char *input)
 	{
 		int input_length = strlen(input);
 		printf("input length is %d\n", input_length);
-		int input_mod = input_length % 4;
+		int input_mod = 4 % input_length;
 		printf("input mod is %d\n", input_mod);
 		char *input_ptr = input;
 
 		if(input_mod != 0)
 		{
+			printf("padding input.\n");
 			char input_pad[input_length + input_mod];
+			input_pad[input_length + input_mod] = '\0';
 			input_pad[0] = '\0';
 
 			for (i = 0; i < input_mod; i++) {
 				input_pad[i] = '0';
 			}
+			input_pad[i] = '\0';
 			strcat(input_pad, input);
 			input_ptr = input_pad;
+			printf("input_pad is %s\n", input_pad);
+			printf("input_ptr is %s\n", input_ptr);
 		}
 
+		printf("fucking gremlins %s\n", input_ptr);
 		char *hex = (char*) malloc(17);
+		printf("fucking gremlins %s\n", input_ptr);
 		hex[18] = '\0';
 		hex[0] = '\0';
 		char curr_nibble[4];
 		for (i = 0; i < strlen(input_ptr); i+=4) 
 		{
+			printf("copying from %s\n", input_ptr);
 			strncpy(curr_nibble, input_ptr+i, 4);
 			curr_nibble[4] = '\0';
 			printf("curr nibble is %s\n", curr_nibble);
