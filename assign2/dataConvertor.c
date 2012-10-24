@@ -59,43 +59,46 @@ char* h2b(char *input)
 	char *binary = (char*) malloc(33);
 	binary[34] = '\0';
 	int i;
+	int curr_ptr = 0;
 
 	for (i = 0; i < strlen(input); i++) 
 	{
 		switch (toupper(input[i]))
 		{
+			case '.' :
+				strcpy(binary+curr_ptr, "."); curr_ptr++; break;
 			case '0' :
-				strcpy(binary+(4*i), "0000"); break;
+				strcpy(binary+curr_ptr, "0000"); curr_ptr+=4; break;
 			case '1' :
-				strcpy(binary+(4*i), "0001"); break;
+				strcpy(binary+curr_ptr, "0001"); curr_ptr+=4; break;
 			case '2' :
-				strcpy(binary+(4*i), "0010"); break;
+				strcpy(binary+curr_ptr, "0010"); curr_ptr+=4; break;
 			case '3' :
-				strcpy(binary+(4*i), "0011"); break;
+				strcpy(binary+curr_ptr, "0011"); curr_ptr+=4; break;
 			case '4' :
-				strcpy(binary+(4*i), "0100"); break;
+				strcpy(binary+curr_ptr, "0100"); curr_ptr+=4; break;
 			case '5' :
-				strcpy(binary+(4*i), "0101"); break;
+				strcpy(binary+curr_ptr, "0101"); curr_ptr+=4; break;
 			case '6' :
-				strcpy(binary+(4*i), "0110"); break;
+				strcpy(binary+curr_ptr, "0110"); curr_ptr+=4; break;
 			case '7' :
-				strcpy(binary+(4*i), "0111"); break;
+				strcpy(binary+curr_ptr, "0111"); curr_ptr+=4; break;
 			case '8' :
-				strcpy(binary+(4*i), "1000"); break;
+				strcpy(binary+curr_ptr, "1000"); curr_ptr+=4; break;
 			case '9' :
-				strcpy(binary+(4*i), "1001"); break;
+				strcpy(binary+curr_ptr, "1001"); curr_ptr+=4; break;
 			case 'A' :
-				strcpy(binary+(4*i), "1010"); break;
+				strcpy(binary+curr_ptr, "1010"); curr_ptr+=4; break;
 			case 'B' :
-				strcpy(binary+(4*i), "1011"); break;
+				strcpy(binary+curr_ptr, "1011"); curr_ptr+=4; break;
 			case 'C' :
-				strcpy(binary+(4*i), "1100"); break;
+				strcpy(binary+curr_ptr, "1100"); curr_ptr+=4; break;
 			case 'D' :
-				strcpy(binary+(4*i), "1101"); break;
+				strcpy(binary+curr_ptr, "1101"); curr_ptr+=4; break;
 			case 'E' :
-				strcpy(binary+(4*i), "1110"); break;
+				strcpy(binary+curr_ptr, "1110"); curr_ptr+=4; break;
 			case 'F' :
-				strcpy(binary+(4*i), "1111"); break;
+				strcpy(binary+curr_ptr, "1111"); curr_ptr+=4; break;
 		}
 	}
 
