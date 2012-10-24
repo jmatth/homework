@@ -56,49 +56,51 @@ int readArgs(int argc, char *argv[])
 
 char* h2b(char *input)
 {
+	char *binary = (char*) malloc(33);
+	binary[34] = '\0';
 	int i;
-	int result;
+
 	for (i = 0; i < strlen(input); i++) 
 	{
-		switch(toupper(input[i]))
+		switch (toupper(input[i]))
 		{
+			case '0' :
+				strcpy(binary+(4*i), "0000"); break;
 			case '1' :
-				result += 1; break;
+				strcpy(binary+(4*i), "0001"); break;
 			case '2' :
-				result += 2; break;
+				strcpy(binary+(4*i), "0010"); break;
 			case '3' :
-				result += 3; break;
+				strcpy(binary+(4*i), "0011"); break;
 			case '4' :
-				result += 4; break;
+				strcpy(binary+(4*i), "0100"); break;
 			case '5' :
-				result += 5; break;
+				strcpy(binary+(4*i), "0101"); break;
 			case '6' :
-				result += 6; break;
+				strcpy(binary+(4*i), "0110"); break;
 			case '7' :
-				result += 7; break;
+				strcpy(binary+(4*i), "0111"); break;
 			case '8' :
-				result += 8; break;
+				strcpy(binary+(4*i), "1000"); break;
 			case '9' :
-				result += 9; break;
+				strcpy(binary+(4*i), "1001"); break;
 			case 'A' :
-				result += 10; break;
+				strcpy(binary+(4*i), "1010"); break;
 			case 'B' :
-				result += 11; break;
+				strcpy(binary+(4*i), "1011"); break;
 			case 'C' :
-				result += 12; break;
+				strcpy(binary+(4*i), "1100"); break;
 			case 'D' :
-				result += 13; break;
+				strcpy(binary+(4*i), "1101"); break;
 			case 'E' :
-				result += 14; break;
+				strcpy(binary+(4*i), "1110"); break;
 			case 'F' :
-				result += 15; break;
-			default:
-				break;
+				strcpy(binary+(4*i), "1111"); break;
 		}
 	}
-	printf("%d\n", result);
-	char *binary = get_binary_integer(result);
+
 	return binary;
+
 }
 
 char* d2b(char *input)
