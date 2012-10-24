@@ -71,10 +71,13 @@ char* b2h(char *input)
 
 	if(found_point >= 0)
 	{
-		char before_point[found_point-1];
-		strncpy(before_point, input, found_point);
+		printf("found point at %d\n", found_point);
+		char before_point[found_point];
 		before_point[found_point] = '\0';
+		strncpy(before_point, input, found_point);
+		printf("before point copies to %s\n", before_point);
 		char *before_point_ptr = before_point;
+		printf("ptr goes to %s\n", before_point_ptr);
 
 		char after_point[strlen(input)-found_point+1];
 		strcpy(after_point, input+found_point+1);
@@ -91,6 +94,9 @@ char* b2h(char *input)
 			strcpy(before_point_pad+before_point_mod, before_point);
 			before_point_ptr = before_point_pad;
 		}
+		printf("before_point_ptr is %s\n", before_point_ptr);
+		int tmp_size = strlen(before_point_ptr);
+		printf("strlen is %d\n", tmp_size);
 
 		char before_point_hex[16];
 		before_point_hex[0] = '\0';
@@ -99,6 +105,7 @@ char* b2h(char *input)
 		{
 			strncpy(curr_nibble, before_point_ptr+i, 4);
 			curr_nibble[4] = '\0';
+			printf("curr nibble is now %s\n", curr_nibble);
 
 			if(!strcmp(curr_nibble, "0000"))
 			{
@@ -152,11 +159,13 @@ char* b2h(char *input)
 
 
 		}
+		printf("i exited at %d\n", i);
 
 		int after_point_len = strlen(after_point);
 		int after_point_mod = after_point_len % 4;
 		if(after_point_mod != 0)
 		{
+			printf("needs padding\n");
 			char after_point_pad[after_point_mod + after_point_len];
 			for (i = after_point_mod + after_point_len - 1; i > after_point_mod; i--) 
 			{
@@ -222,18 +231,19 @@ char* b2h(char *input)
 			{
 				strcat(after_point_hex, "F");
 			}
-
-
 		}
 
-		char *hex_ret = (char*) malloc(18);
+		char *hex_ret = (char*) malloc(32);
 		hex_ret[0] = '\0';
-		hex_ret[19] = '\0';
+		hex_ret[33] = '\0';
 
+		printf("before point comes to %s\n", before_point_hex);
+		printf("after point comes to %s\n", after_point_hex);
 		strcat(hex_ret, before_point_hex);
 		strcat(hex_ret, ".");
 		strcat(hex_ret, after_point_hex);
 
+		printf("final value is %s\n", hex_ret);
 		return hex_ret;
 
 	}
