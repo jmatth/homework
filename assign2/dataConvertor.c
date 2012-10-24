@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	char *result = h2b(argv[2]);
 	printf("Hex to binary is %s\n", result);
 	char *more = b2h(result);
+	printf("Second result is %s\n", more);
 	free(result);
 
 	return 0;
@@ -70,8 +71,9 @@ char* b2h(char *input)
 
 	if(found_point >= 0)
 	{
-		char before_point[found_point + 1];
+		char before_point[found_point-1];
 		strncpy(before_point, input, found_point);
+		before_point[found_point] = '\0';
 		char *before_point_ptr = before_point;
 
 		char after_point[strlen(input)-found_point+1];
@@ -90,12 +92,13 @@ char* b2h(char *input)
 			before_point_ptr = before_point_pad;
 		}
 
-		char before_point_hex[256];
+		char before_point_hex[16];
+		before_point_hex[0] = '\0';
 		char curr_nibble[4];
-		printf("Before Decimal binary is %s\n", before_point_ptr);
 		for (i = 0; i < strlen(before_point_ptr); i+=4) 
 		{
 			strncpy(curr_nibble, before_point_ptr+i, 4);
+			curr_nibble[4] = '\0';
 
 			if(!strcmp(curr_nibble, "0000"))
 			{
@@ -163,10 +166,12 @@ char* b2h(char *input)
 			}
 		}
 
-		char after_point_hex[256];
+		char after_point_hex[16];
+		after_point_hex[0] = '\0';
 		for (i = 0; i < strlen(after_point_ptr); i+=4) 
 		{
 			strncpy(curr_nibble, after_point_ptr+i, 4);
+			curr_nibble[4] = '\0';
 
 			if(!strcmp(curr_nibble, "0000"))
 			{
@@ -221,18 +226,29 @@ char* b2h(char *input)
 
 		}
 
-		printf("Before point is %s\nAfter point is %s\n", before_point_hex, after_point_hex);
+		char *hex_ret = (char*) malloc(18);
+		hex_ret[0] = '\0';
+		hex_ret[19] = '\0';
+
+		strcat(hex_ret, before_point_hex);
+		strcat(hex_ret, ".");
+		strcat(hex_ret, after_point_hex);
+
+		return hex_ret;
 
 	}
 	else
 	{
 		int input_length = strlen(input);
+		printf("input length is %d\n", input_length);
 		int input_mod = input_length % 4;
+		printf("input mod is %d\n", input_mod);
 		char *input_ptr = input;
 
 		if(input_mod != 0)
 		{
 			char input_pad[input_length + input_mod];
+			input_pad[0] = '\0';
 
 			for (i = 0; i < input_mod; i++) {
 				input_pad[i] = '0';
@@ -241,11 +257,15 @@ char* b2h(char *input)
 			input_ptr = input_pad;
 		}
 
-		char hex[256];
+		char *hex = (char*) malloc(17);
+		hex[18] = '\0';
+		hex[0] = '\0';
 		char curr_nibble[4];
 		for (i = 0; i < strlen(input_ptr); i+=4) 
 		{
 			strncpy(curr_nibble, input_ptr+i, 4);
+			curr_nibble[4] = '\0';
+			printf("curr nibble is %s\n", curr_nibble);
 
 			if(!strcmp(curr_nibble, "0000"))
 			{
@@ -299,13 +319,13 @@ char* b2h(char *input)
 
 
 		}
+
+
+		printf("Hex result is %s\n", hex);
+
+		return hex;
 		
-		printf("Hex is %s\n", hex);
 	}
-
-
-	return "bullshit";
-
 }
 
 char* o2b(char *input)
