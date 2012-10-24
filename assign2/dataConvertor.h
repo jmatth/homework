@@ -11,7 +11,11 @@ char* h2b(char *input);
 
 char* o2b(char *input);
 
-char* b2h(char *input);
+char* b2oh(char *input, int hoo);
+
+double b2d(char *input);
+
+void driver(char inf, char *data, char outf);
 
 char* get_binary_integer(int integer);
 
