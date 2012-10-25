@@ -27,6 +27,7 @@ void driver(char inf, char *data, char outf)
 	int sub;
 	double diff;
 	int i;
+	char *result;
 
 	if(inf == outf)
 	{
@@ -51,9 +52,11 @@ void driver(char inf, char *data, char outf)
 		case 'b' :
 			printf("%s\n", binary); break;
 		case 'o' :
-			printf("%s\n", b2oh(binary, 3)); break;
+			result = b2oh(binary, 3);
+			printf("%s\n", result); break;
 		case 'h' :
-			printf("%s\n", b2oh(binary, 4)); break;
+			result = b2oh(binary, 4);
+			printf("%s\n", result); break;
 		case 'd' :
 			dec = b2d(binary);
 			sub = (int) dec;
@@ -66,6 +69,15 @@ void driver(char inf, char *data, char outf)
 				}
 			}
 			printf("%.*f\n", i, dec);
+			break;
+	}
+	if(inf != 'b')
+	{
+		free(binary);
+	}
+	if(outf == 'o' || outf == 'h')
+	{
+		free(result);
 	}
 }
 
