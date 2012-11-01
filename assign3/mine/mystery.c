@@ -1,7 +1,7 @@
 int mystery(int n)
 {
 
-	int i = 0;
+	int i = 2;
 
 	int var1 = 1;
 	int var2 = 0;
