@@ -1,0 +1,2 @@
+int mystery(int n);
+
