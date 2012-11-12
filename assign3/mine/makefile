@@ -13,3 +13,5 @@ mysFunc.o: mysFunc.c
 
 clean:
 	rm -f mysFunc *.o
+	rm -f mysFunc *.pdf
+	rm -f mysFunc *.log
