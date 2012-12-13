@@ -22,7 +22,7 @@ int main()
 	int dummy;
 
 	for (SOME_ACCESS_SIZE = 1;
-			SOME_ACCESS_SIZE <= MEGABYTE*8;
+			SOME_ACCESS_SIZE <= MEGABYTE;
 			SOME_ACCESS_SIZE = SOME_ACCESS_SIZE*2)
 	{
 
