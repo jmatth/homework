@@ -114,7 +114,20 @@ static int expr()
 		reg = next_register();
 		CodeGen(ADD, reg, left_reg, right_reg);
 		return reg;
-	/* YOUR CODE GOES HERE */
+	case '-':
+		next_token();
+		left_reg = expr();
+		right_reg = expr();
+		reg = next_register();
+		CodeGen(SUB, reg, left_reg, right_reg);
+		return reg;
+	case '*':
+		next_token();
+		left_reg = expr();
+		right_reg = expr();
+		reg = next_register();
+		CodeGen(MUL, reg, left_reg, right_reg);
+		return reg;
 	case '0':
 	case '1':
 	case '2':
