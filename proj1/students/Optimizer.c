@@ -29,6 +29,7 @@ int main()
 	/*to be done.                                                           */
 	if (!head->next->next)
 	{
+		printf("Not enough instructions.");
 		return EXIT_SUCCESS;
 	}
 
@@ -37,9 +38,8 @@ int main()
 	instr2 = head->next;
 	instr3 = instr2->next;
 
-	/*temp storage for the result of the optimization*/
-	int opt_result;
 	while(instr3) {
+		opt_flag=0;
 		if (instr1->opcode == LOADI && instr2->opcode == LOADI)
 		{
 			if ((instr3->field2 == instr1->field1 &&
@@ -50,31 +50,52 @@ int main()
 				switch (instr3->opcode)
 				{
 					case ADD:
-						instr1->opcode = LOADI;
-						instr1->field1 = instr1->field1 + instr2->field1;
-						instr1->next = instr3->next;
-						free(instr2);
-						free(instr3);
-						continue;
+						opt_flag = 1;
+						opt_calc = instr1->field2 + instr2->field2;
 						break;
 					case MUL:
-						instr1->opcode = LOADI;
-						instr1->field1 = instr1->field1 * instr2->field1;
-						instr1->next = instr3->next;
-						free(instr2);
-						free(instr3);
-						continue;
+						opt_flag = 1;
+						opt_calc = instr1->field2 * instr2->field2;
 						break;
 					case SUB:
-						/*need to check the order...*/
-						/*continue;*/
+						opt_flag = 1;
+						if (instr3->field2 == instr1->field2)
+						{
+							opt_calc = instr1->field2 - instr2->field2;
+						}
+						else
+						{
+							opt_calc = instr2->field2 - instr1->field2;
+						}
+						break;
+					default:
 						break;
 				}
 			}
 		}
-		instr1=instr2;
-		instr2=instr3;
-		instr3=instr3->next;
+		if (opt_flag)
+		{
+			instr1->opcode = LOADI;
+			instr1->field1 = instr3->field1;
+			instr1->field2 = opt_calc;
+			instr1->next = instr3->next;
+			free(instr2);
+			free(instr3);
+
+			if (instr1->prev)
+			{
+				instr1=instr1->prev;
+			}
+
+			instr2=instr1->next;
+			instr3=instr2->next;
+		}
+		else
+		{
+			instr1=instr2;
+			instr2=instr3;
+			instr3=instr3->next;
+		}
 	}
 
 	PrintInstructionList(stdout, head);
