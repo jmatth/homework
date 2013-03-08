@@ -99,7 +99,23 @@ static int digit()
 
 static int variable()
 {
-	/* YOUR CODE GOES HERE */
+	int reg;
+	if (token == 'a' ||
+		token == 'b' ||
+		token == 'c' ||
+		token == 'd' ||
+		token == 'e')
+	{
+		reg = next_register();
+		CodeGen(LOAD, reg, token, EMPTY_FIELD);
+		next_token();
+		return reg;
+	}
+	else
+	{
+		ERROR("Symbol %c unknown\n", token);
+		exit(EXIT_FAILURE);
+	}
 }
 
 static int expr()
@@ -139,6 +155,12 @@ static int expr()
 	case '8':
 	case '9':
 		return digit();
+	case 'a':
+	case 'b':
+	case 'c':
+	case 'd':
+	case 'e':
+		return variable();
 	default:
 		ERROR("Symbol %c unknown\n", token);
 		exit(EXIT_FAILURE);
@@ -147,39 +169,83 @@ static int expr()
 
 static void assign()
 {
-	/* YOUR CODE GOES HERE */
+	char var = token;
+	int reg;
+	next_token();
+	next_token();
+	reg = expr();
+	CodeGen(STORE, var, reg, EMPTY_FIELD);
 }
 
 static void read()
 {
-	/* YOUR CODE GOES HERE */
+	if (token == '?')
+	{
+		next_token();
+		CodeGen(READ, token, EMPTY_FIELD, EMPTY_FIELD);
+		next_token();
+	}
+	else
+	{
+		ERROR("Symbol %c unknown\n", token);
+		exit(EXIT_FAILURE);
+	}
+
 }
 
 static void print()
 {
-	/* YOUR CODE GOES HERE */
+	if (token == '!')
+	{
+		next_token();
+		CodeGen(WRITE, token, EMPTY_FIELD, EMPTY_FIELD);
+		next_token();
+	}
+	else
+	{
+		ERROR("Symbol %c unknown\n", token);
+		exit(EXIT_FAILURE);
+	}
 }
 
 static void stmt()
 {
-	/* YOUR CODE GOES HERE */
+	switch (token)
+	{
+		case '?': 
+			read();
+			break;
+		case '!':
+			print();
+			break;
+		default:
+			assign();
+			break;
+	}
 }
 
 static void morestmts()
 {
-	/* YOUR CODE GOES HERE */
+	if (token == ';')
+	{
+		next_token();
+		stmtlist();
+	}
 }
 
 static void stmtlist()
 {
-	/* YOUR CODE GOES HERE */
+	stmt();
+	morestmts();
 }
 
 static void program()
 {
-	/* YOUR CODE GOES HERE */
-	/* the following expr(); is to get you started */
-	expr();
+	if (token != '.')
+	{
+		stmtlist();
+	}
+
 	if (token != '.') {
 		ERROR("Program error.  Current input symbol is %c\n", token);
 		exit(EXIT_FAILURE);
