@@ -1,4 +1,4 @@
-
+; vim: set st=2 sw=2 expandtab:
 ; *********************************************
 ; *  314 Principles of Programming Languages  *
 ; *  Spring 2013                              *
@@ -15,6 +15,11 @@
 ;; HELPER FUNCTIONS
 
 ;; *** CODE FOR ANY HELPER FUNCTION GOES HERE ***
+(define key_helper
+  (lambda (key_num w)
+    (if (null? w) key_num
+      (key_helper ( + ( * 33 key_num) ( ctv ( car w ) ) ) ( cdr w )
+))))
 
 
 ;; -----------------------------------------------------
@@ -22,7 +27,7 @@
 
 (define key
   (lambda (w)
-     'SOME_CODE_GOES_HERE ;; *** FUNCTION BODY IS MISSING ***
+    (key_helper 5381 w)
 ))
 
 
