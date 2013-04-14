@@ -47,7 +47,8 @@
 
 (define gen-hash-multiplication-method
   (lambda (size) ;; range of values: 0..size-1
-     'SOME_CODE_GOES_HERE ;; *** FUNCTION BODY IS MISSING ***
+    (lambda (k)
+      (floor (* size (- (* k A) (floor (* k A))))))
 ))
 
 
