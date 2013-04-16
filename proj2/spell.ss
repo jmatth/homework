@@ -15,11 +15,6 @@
 ;; HELPER FUNCTIONS
 
 ;; *** CODE FOR ANY HELPER FUNCTION GOES HERE ***
-(define key_helper
-  (lambda (key_num w)
-    (if (null? w) key_num
-      (key_helper ( + ( * 33 key_num) ( ctv ( car w ) ) ) ( cdr w )
-))))
 
 (define build_dict_vectors
   (lambda (hashes dict)
@@ -55,9 +50,7 @@
 
 (define key
   (lambda (w)
-    (key_helper 5381 w)
-))
-
+    (foldl (lambda (char int) (+ (* 33 int) (ctv char))) 5381 w)))
 
 ;; -----------------------------------------------------
 ;; HASH FUNCTION GENERATORS
