@@ -21,6 +21,34 @@
       (key_helper ( + ( * 33 key_num) ( ctv ( car w ) ) ) ( cdr w )
 ))))
 
+(define build_dict_vectors
+  (lambda (hashes dict)
+    (if (null? hashes) '()
+      (cons (build_single_dict_vector (car hashes) dict) (build_dict_vectors (cdr hashes) dict)))))
+
+(define build_single_dict_vector
+  (lambda (hash dict)
+    (if (null? dict) '()
+      (cons (hash (car dict)) (build_single_dict_vector hash (cdr dict))))))
+
+(define build_word_vector
+  (lambda (hashes word)
+    (if (null? hashes) '()
+      (cons ((car hashes) word) (build_word_vector (cdr hashes) word)))
+))
+
+(define check_spelling
+  (lambda (dict_vectors word_vector)
+    (if (null? word_vector) #t
+      (if (check_word_hash (car dict_vectors) (car word_vector))
+        (check_spelling (cdr dict_vectors) (cdr word_vector)) #f))))
+
+(define check_word_hash
+  (lambda (dict_vector word_hash)
+    (if (null? dict_vector) #f
+      (if (= (car dict_vector) word_hash) #t
+        (check_word_hash (cdr dict_vector) word_hash)))))
+
 
 ;; -----------------------------------------------------
 ;; KEY FUNCTION
@@ -38,7 +66,7 @@
 (define gen-hash-division-method
   (lambda (size) ;; range of values: 0..size-1
     (lambda (k)
-      (modulo k size))
+      (modulo (key k) size))
 ))
 
 ;; value of parameter "size" is not critical
@@ -48,7 +76,7 @@
 (define gen-hash-multiplication-method
   (lambda (size) ;; range of values: 0..size-1
     (lambda (k)
-      (floor (* size (- (* k A) (floor (* k A))))))
+      (floor (* size (- (* (key k) A) (floor (* (key k) A))))))
 ))
 
 
@@ -90,8 +118,10 @@
 
 (define gen-checker
   (lambda (hashfunctionlist dict)
-     'SOME_CODE_GOES_HERE ;; *** FUNCTION BODY IS MISSING ***
-))
+     ((lambda (bitvectors)
+        (lambda (word)
+          (check_spelling bitvectors (build_word_vector hashfunctionlist word))))
+      (build_dict_vectors hashfunctionlist dict))))
 
 
 ;; -----------------------------------------------------
