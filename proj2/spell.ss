@@ -23,14 +23,6 @@
       (if (= (car lst) atm) #t
         (is-member (cdr lst) atm)))))
 
-; Similar to map, but takes a list of functions (fns)
-; and calls each one with arg. Returns a list of the
-; results.
-(define map-fns
-  (lambda (fns arg)
-    (if (null? fns) '()
-      (cons ((car fns) arg) (map-fns (cdr fns) arg)))))
-
 ;; -----------------------------------------------------
 ;; KEY FUNCTION
 
@@ -99,7 +91,7 @@
   (lambda (hashfunctionlist dict)
     ((lambda (bitvectors)
       (lambda (word)
-        (andmap is-member bitvectors (reduce (lambda (fn lst) (cons (fn word) lst)) hashfunctionlist '()))))
+        (andmap is-member bitvectors (map (lambda (fn) (fn word)) hashfunctionlist))))
       (reduce (lambda (fn lst) (cons (map fn dict) lst)) hashfunctionlist '()))))
 
 
