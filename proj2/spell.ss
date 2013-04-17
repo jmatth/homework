@@ -16,34 +16,27 @@
 
 ;; *** CODE FOR ANY HELPER FUNCTION GOES HERE ***
 
-(define build_dict_vectors
-  (lambda (hashes dict)
-    (if (null? hashes) '()
-      (cons (build_single_dict_vector (car hashes) dict) (build_dict_vectors (cdr hashes) dict)))))
+; Checks if atm is a member of lst.
+(define is-member
+  (lambda (lst atm)
+    (if (null? lst) #f
+      (if (= (car lst) atm) #t
+        (is-member (cdr lst) atm)))))
 
-(define build_single_dict_vector
-  (lambda (hash dict)
-    (if (null? dict) '()
-      (cons (hash (car dict)) (build_single_dict_vector hash (cdr dict))))))
+; Maps each function in list fns to list lst, and
+; returns a list of the results (list of lists).
+(define map-each
+  (lambda (fns lst)
+    (if (null? fns) '()
+      (cons (map (car fns) lst) (map-each (cdr fns) lst)))))
 
-(define build_word_vector
-  (lambda (hashes word)
-    (if (null? hashes) '()
-      (cons ((car hashes) word) (build_word_vector (cdr hashes) word)))
-))
-
-(define check_spelling
-  (lambda (dict_vectors word_vector)
-    (if (null? word_vector) #t
-      (if (check_word_hash (car dict_vectors) (car word_vector))
-        (check_spelling (cdr dict_vectors) (cdr word_vector)) #f))))
-
-(define check_word_hash
-  (lambda (dict_vector word_hash)
-    (if (null? dict_vector) #f
-      (if (= (car dict_vector) word_hash) #t
-        (check_word_hash (cdr dict_vector) word_hash)))))
-
+; Similar to map, but takes a list of functions (fns)
+; and calls each one with arg. Returns a list of the
+; results.
+(define map-fns
+  (lambda (fns arg)
+    (if (null? fns) '()
+      (cons ((car fns) arg) (map-fns (cdr fns) arg)))))
 
 ;; -----------------------------------------------------
 ;; KEY FUNCTION
@@ -111,10 +104,10 @@
 
 (define gen-checker
   (lambda (hashfunctionlist dict)
-     ((lambda (bitvectors)
-        (lambda (word)
-          (check_spelling bitvectors (build_word_vector hashfunctionlist word))))
-      (build_dict_vectors hashfunctionlist dict))))
+    ((lambda (bitvectors)
+      (lambda (word)
+        (andmap is-member bitvectors (map-fns hashfunctionlist word))))
+      (map-each hashfunctionlist dict))))
 
 
 ;; -----------------------------------------------------
