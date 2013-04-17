@@ -16,13 +16,6 @@
 
 ;; *** CODE FOR ANY HELPER FUNCTION GOES HERE ***
 
-; Checks if atm is a member of lst.
-(define is-member
-  (lambda (lst atm)
-    (if (null? lst) #f
-      (if (= (car lst) atm) #t
-        (is-member (cdr lst) atm)))))
-
 ;; -----------------------------------------------------
 ;; KEY FUNCTION
 
@@ -91,7 +84,7 @@
   (lambda (hashfunctionlist dict)
     ((lambda (bitvectors)
       (lambda (word)
-        (andmap is-member bitvectors (map (lambda (fn) (fn word)) hashfunctionlist))))
+        (andmap (lambda (bv hsh) (ormap (lambda (item) (= item hsh)) bv)) bitvectors (map (lambda (fn) (fn word)) hashfunctionlist))))
       (reduce (lambda (fn lst) (cons (map fn dict) lst)) hashfunctionlist '()))))
 
 
