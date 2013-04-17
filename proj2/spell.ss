@@ -85,7 +85,7 @@
     ((lambda (bitvectors)
       (lambda (word)
         (andmap (lambda (bv hsh) (ormap (lambda (item) (= item hsh)) bv)) bitvectors (map (lambda (fn) (fn word)) hashfunctionlist))))
-      (reduce (lambda (fn lst) (cons (map fn dict) lst)) hashfunctionlist '()))))
+      (map (lambda (fn) (map fn dict)) hashfunctionlist))))
 
 
 ;; -----------------------------------------------------
