@@ -57,13 +57,16 @@ int main(int argc, char *argv[])
 		destroy_word_list(wl);
 		exit(EXIT_FAILURE);
 	}
-	
+	#pragma omp parallel shared(bv,hf,bv_size,num_hf,wl_size,wl)
+	{
+	#pragma omp for private(i,j,hash) schedule(dynamic)
 	for (i = 0; i < wl_size; i++) {
 		for (j = 0; j < num_hf; j++) {
 			hash = hf[j] (get_word(wl, i));
 			hash %= bv_size;
 			bv[hash] = 1;
 		}
+	}
 	}
 
 	/* do the spell checking */
