@@ -58,16 +58,13 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	#pragma omp parallel shared(num_hf,hf,bv_size,bv)
-	{
-	#pragma omp for private(i,j,hash) schedule(static)
+	#pragma omp parallel for private(i,j,hash) schedule(static, 90)
 	for (i = 0; i < wl_size; i++) {
 		for (j = 0; j < num_hf; j++) {
 			hash = hf[j] (get_word(wl, i));
 			hash %= bv_size;
 			bv[hash] = 1;
 		}
-	}
 	}
 
 	/* do the spell checking */
