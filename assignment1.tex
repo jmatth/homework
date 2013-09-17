@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage[margin=0.75in]{geometry}
 \usepackage{indentfirst}
+\usepackage{listings}
 
 \title{\bf Algorithms Homework 1}
 \author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
@@ -17,7 +18,6 @@ log(n) \rfloor$ and at most $n - 1$.
 
 %Question 2
 \item Prove that $log(n!) \in \Theta(nlogn)$
-
 
 %Question 3
 \item Prove by induction on $k$.
@@ -38,6 +38,22 @@ tree.
 \item Using the method $HamC(G)$, which returns Yes if $G$ contains a
 Hamiltonian Cycle, and No otherwise, construct an algorithm to compute
 $HamP(G,u,v)$.
+
+\begin{lstlisting}
+HamP(G,u,v)
+    if u and v are neighbors:
+        return HamC(G)
+    Create edge between u and v
+    if HamC(G) returns Yes:
+        neighbors = v.neighbors
+        remove v from graph
+        for n in neighbors
+            assign v to n
+            if HamP(G,u,v) returns Yes:
+                return Yes
+    return No
+
+\end{lstlisting}
 
 \end{enumerate}
 
