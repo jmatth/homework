@@ -32,7 +32,23 @@ Functions: $4n, n^2, nlogn, nlnn, logn, e^n$
 %Question 5
 \item Let $G = (V,E,W)$ be a weighted graph such that no two different edges
 in E have the same weight. Prove that $G$ has a unique unrooted minimal spanning
-tree.
+tree.\\
+Proof:\\
+Assume $G$ has at least two unrooted minimal spanning trees.\\
+Let two of those trees be tress $A$ and $B$, which differ by one
+edge.
+
+Add the edge that is not in $A$ but is in $B$ to $A$.
+
+$A$ now contains a cycle, so remove an edge. There must be one
+correct choice as the edge weights are unique.
+
+$A$ is now an unrooted minimal spanning tree that is either
+smaller than the original $A$ or smaller than $B$. This is a contradiction.
+
+Therefore, the assumption was wrong, so $G$ can only have one
+unrooted minimal spanning tree.
+
 
 %Question 6
 \item Using the method $HamC(G)$, which returns Yes if $G$ contains a
