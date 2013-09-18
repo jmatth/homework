@@ -16,6 +16,33 @@
 \item Prove: A binary tree with $n$ nodes has a depth at least $\lfloor
 log(n) \rfloor$ and at most $n - 1$.
 
+Proof:
+
+\begin{itemize}
+
+    \item Assume the tree is full. Each level has $2^i$ nodes, where $i$ is the
+        depth at that level.
+
+    \item. The total number of nodes in the tree is then
+        $\displaystyle\sum\limits_{i=0}^d 2^i$
+
+    \item This simplifies to $2^{d+1}-1$
+
+    \item Since this is the max number of for depth $d$, we can say that $n \leq
+        2^{d+1}-1$. Then by algebra:
+
+    \item $n+1 \leq 2^{d+1}$
+
+    \item $log(n+1) \leq (d+1)log2$
+
+    \item $log(n+1) \leq d+1$
+
+    \item $log(n+1) - 1 \leq d$
+
+    % FIXME: What's the rest of this?
+
+\end{itemize}
+
 %Question 2
 \item Prove that $log(n!) \in \Theta(nlogn)$
 
