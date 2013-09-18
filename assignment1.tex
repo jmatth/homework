@@ -2,6 +2,7 @@
 \usepackage[margin=0.75in]{geometry}
 \usepackage{indentfirst}
 \usepackage{listings}
+\usepackage{amssymb}
 
 \title{\bf Algorithms Homework 1}
 \author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
@@ -71,8 +72,31 @@ $= (\frac{1}{3}k+1)(k+1)(k+2)$\\
 $= \frac{1}{3}(k+3)(k+1)(k+2)$\\
 $= \frac{1}{3}(k+1)(k+2)(k+3)$\\
 QED
-\item $\displaystyle\sum\limits_{i=0}^k i2^i $ $= (k-1)2^{k+1}+2$
-\item $\displaystyle\sum\limits_{i=0}^k \frac{i}{2^i} $ $= 2-\frac{k+2}{2^k}$
+\item $\displaystyle\sum\limits_{i=0}^k i2^i $ $= (k-1)2^{k+1}+2$ \\
+
+  \textbf{Base case.} \\ 
+    $0 * 2^0 = 0$. \\
+    $(0 - 1)2^{0 + 1} + 2 = 0$. \\ \\
+  \textbf{Inductive step.}
+    $\sum_{i=0}^k i2^i + (k + 1)2^{k+1} \stackrel{?}{=} k2^{k+2} + 2$ \\
+    $(k - 1)2^{k+1} + 2 + (k + 1)2^{k+1}$ \\
+    $((k + 1) + (k - 1))2^{k+1} + 2$ \\
+    $(2k)2^{k+1}+2)$ \\
+    $= K2^{k+2} + 2$, which is what we were trying to show. $\blacksquare$
+
+\item $\displaystyle\sum\limits_{i=0}^k \frac{i}{2^i} $ $= 2-\frac{k+2}{2^k}$ \\
+
+  \textbf{Base case.} \\
+    $\frac{0}{2^0} = 0$ \\
+    $2 - \frac{0 + 2}{2^0}$ \\
+    $2 - 2 = 0$.\\
+
+  \textbf{Inductive step.} \\
+    $\displaystyle \sum_{i=0}^k \frac{i}{2^i} + \frac{k+1}{2^{k+1}} \stackrel{?}{=} 2 - \frac{k+3}{2^{k + 1}}$ \\
+    $\displaystyle 2 - \frac{k+2}{2^k} + \frac{k+1}{2^{k+1}}$\\
+    $\displaystyle 2 - \frac{2k+4}{2^{k+1}} + \frac{k+1}{2^{k+1}}$\\
+    $\displaystyle 2 - \frac{k+3}{2^{k+1}} = 2 - \frac{k+3}{2^{k+1}}$, which is what we were trying to show. $\blacksquare$
+
 \end{itemize}
 
 
