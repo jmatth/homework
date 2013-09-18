@@ -23,7 +23,7 @@ Proof:
     \item Assume the tree is full. Each level has $2^i$ nodes, where $i$ is the
         depth at that level.
 
-    \item. The total number of nodes in the tree is then
+    \item The total number of nodes in the tree is then
         $\displaystyle\sum\limits_{i=0}^d 2^i$
 
     \item This simplifies to $2^{d+1}-1$
@@ -39,9 +39,16 @@ Proof:
 
     \item $log(n+1) - 1 \leq d$
 
+    % FIXME: and then a miracle happens...
+
     \item $\lfloor log(n) \rfloor \leq d$
 
 \end{itemize}
+
+For the maximum depth, it is impossible to have a depth greater than the number
+of nodes, so the greatest possible depth is $n-1$, if such a configuration
+exists. This type of tree can be trivially shown to exist by lining all the
+nodes up down one side of the tree, resulting in a tree with $n-1$ depth.
 
 %Question 2
 \item Prove that $log(n!) \in \Theta(nlogn)$
