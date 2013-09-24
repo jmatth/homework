@@ -3,8 +3,9 @@
 \usepackage{indentfirst}
 \usepackage{listings}
 \usepackage{amssymb}
+\usepackage{amsmath}
 
-\title{\bf Algorithms Homework 1}
+\title{\bf Algorithms Homework 2}
 \author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
 \date{}
 
@@ -20,13 +21,42 @@
 
 \item Question 3
 
-\item We'll start by proving the following lemma; we'll use this lemma to
-inductively prove the given statement.
+\item 
 
-\textbf{Lemma.} The smallest value in any column is greater than the smallest
-value in the previous column.\\
-\textbf{Proof.} Consider the following matrix:
+  We'll start by proving the following lemma; we'll use this lemma to
+  inductively prove the given statement.
 
+  \textbf{Lemma.} The smallest value in any column is greater than or equal to
+  the smallest value in the previous column.\\
+  \textbf{Proof.} Consider the following matrix:
+
+  $\begin{matrix}
+    a & b & c \\
+    d & e & f \\
+    g & h & i
+  \end{matrix}$
+
+  This matrix has not had its columns sorted yet. So, we'll assume $e$ is the
+  smallest element in its column; therefore $e \ge d$ since the rows are sorted.
+
+  We want to show that $e$ is greater than or equal to the smallest element of the first
+  column, whatever that may be. Well, if $d$ is the smallest element then this
+  is trivially true, by our assumption. If there is an element in the first
+  column which is $\le d$, then clearly it is also smaller than $\le e$;
+  i.e.\ for an arbitrary element $n$, $n \le d \le e$; so $e$ is still larger 
+  than or equal tothe smallest element of the first column.
+
+  So, now we'll prove what was asked in the question.
+
+  \textbf{Theorem.} If we have a 2D array with rows in sorted order, the rows
+  will remain sorted after sorting the columns as well. \\
+  \textbf{Proof.} After sorting, the top row of the array will contain the
+  smallest element of each column. So, by our lemma, this row must be sorted.
+
+  Eliminate that row from the array. Now, the new top row contains the new
+  smallest element of that column. By our lemma, again, that row must be
+  sorted. We can continue eliminiating the top row and this process will
+  continue; showing that all rows are still sorted. $\blacksquare$
 
 \end{enumerate}
 
