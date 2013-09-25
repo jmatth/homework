@@ -58,6 +58,29 @@
   sorted. We can continue eliminiating the top row and this process will
   continue; showing that all rows are still sorted. $\blacksquare$
 
+\item
+
+  Since a hamiltonian cycle is simply a hamiltonian path which is also a
+  cycle, we can simply run each pair of neighbors through the $HamP$ routine.
+  There will be, at maximum, $n^2$ neighbors, where $n$ is the number of nodes;
+  so, this whole operation will take polynomial time.
+
+\item
+  
+  Well, we begin by running the $HamP$ routine on each pair of nodes. 
+  Eventually we'll find a pair of nodes for which the routine returns true.
+  This will take at most $n^2$ times the runtime of $HamP$ time, which is still
+  polynomial.
+
+  Then, once we have two nodes $s$ and $t$ for which this works, we remove $s$
+  and run the subroutine on $t$ with each of $s$'s former neighbors. By 
+  repeating this process every time the subroutine succeeds, we can determine
+  the path.
+
+  Again, since there are at most $n^2$ edges in the graph, we'll need to run the
+  $HamP$ routine a maximum of $n^2$ times. So, the runtime of this entire
+  operation is still polynomial.
+
 \end{enumerate}
 
 \end{document}
