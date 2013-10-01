@@ -1,0 +1,66 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{amssymb}
+
+\title{\bf Algorithms Homework 2}
+\author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+%Question 1
+\item Suppose that you are given an $k-sorted$ array, in which no element is
+    farther than $k$ positions away from its final (sorted) position. Give an
+    algorithm which will sort such an array. Prove its correctness. Analyse its
+    running time. Note: your algorithm should run faster than $\Theta(nlogn)$,
+    that is it should take advantage of the fact that the array is almost
+    sorted.
+
+
+%Question 2
+\item Consider once again the $k-sorted$ array of the previous problem. Show
+    that any comparison based algorithm for sorting an almost sorted array makes
+    $\Omega(nlogk)$ comparisons.
+
+%Question 3
+\item Prove that if an $n$ node graph has two of the following properties, it has the
+third:
+\begin{itemize}
+    \item It has $n-1$ edges.
+    \item It is connected
+    \item It is acyclic
+\end{itemize}
+
+%Question 4
+\item Define a subtree of be any connected subgraph of a tree.
+    \begin{itemize}
+        \item Prove that the number of subtrees of a complete binary tree is not
+            polynomial in the number of nodes.
+        \item Give an example of a class of trees ${T_n}$ where the number of
+            subtrees is a polynomial in the number of nodes.
+    \end{itemize}
+
+%Question 5
+\item Let $F_i$ be the $i$th Fibonacci number. Show that $F_{n+2} = 1 +
+    \sum_{i=0}^n F_i$.
+
+%Question 6
+\item Show that if you have a polynomial time algorithm for Hamiltonian Path,
+    that you have a polynomial time algorithm for sorting.
+
+%Question 7
+\item The Bounded Degree Spanning Tree (BDST) problem is the following:\\
+    Input: Graph $G$ and integer $k$.\\
+    Output: Yes, if $G$ has a spanning tree where every node has a degree of at
+    most $k$, No, otherwise.\\
+    Suppose there is no polynomial time algorithm for Hamilonian Path. Show that
+    there is no polynomial time algorithm for BDST.
+
+\end{enumerate}
+
+\end{document}
