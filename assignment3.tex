@@ -98,6 +98,18 @@ creating a connected graph.
 \item Let $F_i$ be the $i$th Fibonacci number. Show that $F_{n+2} = 1 +
     \sum_{i=0}^n F_i$.
 
+    Proof: By Induction\\
+    \begin{itemize}
+        \item Base Case: $n=0$
+        \begin{itemize}
+            \item First 3 numbers in sequence: 0, 1, 1
+            \item $F_{n+2} = 1 + \sum_{i=0}^n F_i$
+            \item 1 = 1 + 0 + 1
+            \item 1 = 2
+            \item Does not hold
+        \end{itemize}
+    \end{itemize}
+
 %Question 6
 \item Show that if you have a polynomial time algorithm for Hamiltonian Path,
     that you have a polynomial time algorithm for sorting.
