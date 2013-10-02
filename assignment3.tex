@@ -60,6 +60,31 @@ third:
     \item It is acyclic
 \end{itemize}
 
+In order to prove this, we will use 2 lemmas whose proofs are trivial:\\
+1. The fewest number of edges needed to connect $n$ nodes is $n-1$.\\
+2. The fewest number of edges between $n$ nodes that must result in a cycle is
+$n$.
+
+Proof 1: If an $n$ node graph has $n-1$ edges and is connected, then it is
+acyclic.\\
+Because $n-1$ edges is the minimum number of edges to connect $n$ nodes, then
+the graph must be acyclic because if it were cyclic, then it would not contain
+the minimum number of edges to connect the nodes.
+
+Proof 2: If an $n$ node graph is connected and acyclic, then it has $n-1$
+edges.\\
+If a graph is connected and acyclic, this means that it must have at least the
+minimum number of edges to connect the nodes, but less than the number of edges
+where a cycle is require. Therefore, it must have at least $n-1$ edges and less
+than $n$ edges by the lemmas. Therefore, it must have $n-1$ edges.
+
+Proof 3: If an $n$ node graph has $n-1$ edges and is acyclic, then it is
+connected.\\
+Let the first $n-2$ edges be used to connect $n-1$ nodes, which will not create
+a cycle. The last edge can be used to connect the final node, or must create a
+cycle with one of the other nodes. Therefore, it must connect the final node,
+creating a connected graph.
+
 %Question 4
 \item Define a subtree of be any connected subgraph of a tree.
     \begin{itemize}
