@@ -104,9 +104,16 @@ creating a connected graph.
         \begin{itemize}
             \item First 3 numbers in sequence: 0, 1, 1
             \item $F_{n+2} = 1 + \sum_{i=0}^n F_i$
-            \item 1 = 1 + 0 + 1
-            \item 1 = 2
-            \item Does not hold
+            \item 1 = 1 + 0
+            \item 1 = 1
+            \item Base case holds
+        \end{itemize}
+        \item Assume it holds for everything up to $n$, prove it holds for $n+1$
+        \begin{itemize}
+            \item $F_{n+3} = 1 + \sum_{i=0}^{n+1} F_i$
+            \item $F_{n+3} = F_{n+2} + F_{n+1}$ By induction
+            \item This is the definition of a Fibonacci sequence
+            \item QED
         \end{itemize}
     \end{itemize}
 
