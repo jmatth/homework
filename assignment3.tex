@@ -22,6 +22,30 @@
     sorted.
 
 
+\textbf{Algorithm:}
+
+\begin{enumerate}
+    \item Given a $k-sorted$ list of $n$ elements, split the list into
+        $\frac{n}{k}$ lists of $k$ elements.
+
+    \item Perform a merge sort on each of the sub-lists. \hfill $O(\frac{n}{k} *
+        klog(k)) = O(nlogk)$
+
+    \item At this point each element will still be no greater than $k$ away from
+        its sorted position.
+
+    \item As in mergesort, merge all of these sorted sub-lists back into a
+        single list. Each of these merges can move each element at most twice as
+        far from it's initial position, but each successive merge will cover
+        twice as many elements and eventually place each element in it's correct
+        position. \hfill $O(n)$
+
+    \item Final efficiency is $O(nlogk) + O(n) = O(nlogk)$
+
+
+\end{enumerate}
+
+
 %Question 2
 \item Consider once again the $k-sorted$ array of the previous problem. Show
     that any comparison based algorithm for sorting an almost sorted array makes
