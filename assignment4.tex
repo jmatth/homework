@@ -51,6 +51,23 @@ Query implementation:
 
     Give an algorithm to compute $M$.
 
+    Implementation of algorithm A:
+    \begin{itemize}
+        \item If $T$.root has no children: done
+        \item Do in order traversal to find $e$ and keep track of the deeper
+            node that $e$ touches as the root of $T_2$. $O(n)$
+        \item $T$.root = $e$. $O(1)$
+        \item Go up the tree to find the root of $T_1$. $O(n)$
+        \item $T$.root.left = $A(T_1)$
+        \item $T$.root.right = $A(T_2)$
+    \end{itemize}
+
+    Run time analysis:
+    \begin{itemize}
+        \item $T(n) = 2T(\frac{n}{2}) + 2n$
+        \item By Master Theorem: $T(n) is SOMETHING$
+    \end{itemize}
+
 \item The Set Cover Problem is defined as follows:
 
 \item Let $T = (V,E)$ be an edge weighted tree such that $e \in E$ has minimal
