@@ -51,6 +51,37 @@ Query implementation:
 
     Give an algorithm to compute $M$.
 
+    Implementation of $M$:
+    \begin{itemize}
+        \item Preprocess tree $T$ for $LCA$.
+        \item Let $S$ have $n$ nodes. Let ${l}$ be the set of leaves below $v$
+            in $S$. Let $T$ have $k$ nodes.
+        \item Compute ${l}$ by doing an in order traversal of the tree with $v$
+            as a root. $O(n)$.
+        \item Find the locations of each node in ${l}$ in $T$. $O(k)$
+        \item Recursively do $LCA$ on ${l}$ in $T$ by finding the $LCA$ of each
+            pair of nodes until one common $LCA$ is found. $log(|{l}|)$ iterations
+            of $LCA$ will be done. $O(log(|{l}|)$
+        \item Total runtime: $n + k + log({|l|})$
+        \item Since the number of nodes is a tree is greater than or equal to
+            the number of leaves it has, we can say that $|{l}| \leq k$
+        \item Therefore, total run time is $O(n+k)$
+    \end{itemize}
+
+
+\item The Set Cover Problem is defined as follows:
+
+\item Let $T = (V,E)$ be an edge weighted tree such that $e \in E$ has minimal
+    weight.  Let $T_1$ and $T_2$ be the trees derived from $T$ by removing $e$.
+    Then we define a cartesian tree of $T$ to be a binary tree such that $e$ is
+    the root, and the left and right children of $e$ are the cartesian tress of
+    $T_1$ and $T_2$ respectively. If either $T_1$ or $T_2$ are singleton nodes,
+    then their cartesian trees are empty.
+
+    Give and algorithm for finding the cartesian tree of a tree. Give an
+    analysis of its running time. The faster the algorithm, the better your
+    grade.
+
     Implementation of algorithm A:
     \begin{itemize}
         \item If $T$.root has no children: done
@@ -65,21 +96,8 @@ Query implementation:
     Run time analysis:
     \begin{itemize}
         \item $T(n) = 2T(\frac{n}{2}) + 2n$
-        \item By Master Theorem: $T(n) is SOMETHING$
+        \item By Master Theorem: $T(n) is \Theta(nlogn)$
     \end{itemize}
-
-\item The Set Cover Problem is defined as follows:
-
-\item Let $T = (V,E)$ be an edge weighted tree such that $e \in E$ has minimal
-    weight.  Let $T_1$ and $T_2$ be the trees derived from $T$ by removing $e$.
-    Then we define a cartesian tree of $T$ to be a binary tree such that $e$ is
-    the root, and the left and right children of $e$ are the cartesian tress of
-    $T_1$ and $T_2$ respectively. If either $T_1$ or $T_2$ are singleton nodes,
-    then their cartesian trees are empty.
-
-    Give and algorithm for finding the cartesian tree of a tree. Give an
-    analysis of its running time. The faster the algorithm, the better your
-    grade.
 
 \item Give a lower bound of $\Omega(nlogn)$ for constructing the cartesian tree
     of a tree.
