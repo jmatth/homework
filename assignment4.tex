@@ -1,0 +1,39 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{amssymb}
+
+\title{\bf Algorithms Homework 4}
+\author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+%Question 1
+\item The Longest Common Prefix problem is defined as follows:
+
+    {\bf Preprocess}: $D$ is a set of $n$ strings, each of which is
+        length $m$.
+
+    {\bf Queries}: $LCP(i,j)$ returns $k$ if $S_i[1...k] = S_j[1...k]$
+        but $S_i[1...k+1] \neq S_j[1...k+1]$
+
+Give an algorithm for this where the query time is constant.
+
+%Question 2
+\item Given a rooted tree $T$, define $T(v)$ to be the set of leaves in $T$
+    below $v$. For a set of nodes $V'$, define $LCA_T(V')$ to be the shallowest
+    node $u$ in $T$ such that $u = LCA(w,x)$, for $w$,$x \in V'$
+
+    Given two rooted trees, $S$ and $T$ with the same leaf labels, define, for
+    each node $v$ in $S$, $M(v) = LCA_T(S(v))$.
+
+    Give an algorithm to compute $M$.
+
+\end{enumerate}
+
+\end{document}
