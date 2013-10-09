@@ -24,6 +24,23 @@
 
 Give an algorithm for this where the query time is constant.
 
+Preprocess implementation:
+\begin{itemize}
+    \item Build a prefix tree of all strings in $D$. $O(nm)$
+    \item Create a hash map mapping each word it its leaf in the prefix tree.
+        $O(n)$
+    \item Preprocess for $LCA$ for nodes in hash map. $O(n)$
+    \item Total runtime: $O(nm)$
+\end{itemize}
+
+Query implementation:
+\begin{itemize}
+    \item For inputs $i$ and $j$, find each in the hash map, which will allow
+        you to find the corresponding leaves in the prefix tree. $O(1)$
+    \item Calculate $LCA$ of the two nodes. $O(1)$.
+    \item Total runtime: $O(1)$
+\end{itemize}
+
 %Question 2
 \item Given a rooted tree $T$, define $T(v)$ to be the set of leaves in $T$
     below $v$. For a set of nodes $V'$, define $LCA_T(V')$ to be the shallowest
