@@ -1,0 +1,54 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+
+\noindent Joshua Matthews
+
+\noindent Computer Architecture
+
+\noindent prefixStat
+
+\section{Design}
+When called, the program reads the arguments provided at the command line, exits with an error message and help text if the arguments are invalid. It then attempts to load the file test.dat and again exits with an error if this does not exist. From there a different action is taken depending on the options specified at the command line.
+
+\subsection{Line Count}
+If a line count is specified, then the file is read into a buffer one character at a time and a counter is incrimented each time a newline is encountered. At the end of the loop, the counter is incremented one more time if the file was not found to end in a newline, and the count is printed.
+
+\subsection{Word Count}
+If word count is specified, the file is read into a buffer one character at a time. Whenever a non-whitespace character is encountered, a counter is incremented and the program begins looking for whitepace characters. Once one is encountered, the entire loop repeats until it encounters EOF.
+Once the loop exits the count is printed.
+
+\subsection{Find Prefix}
+If a prefix is specified to be found, then the file is read into a buffer one character at a time. At each step it is compared to a character at the current index of the prefix. If the characters are found to be a case-insensitive match, then the index is incremented. Otherwise the index is reset and the rest of the word is skipped over until white space is found and the loop repeats. If the index exceeds the lenght of the prefix, then a match is determined to have been found. The matching string is printed, the index is reset, and the loop repeats. When the loop exits the count is printed.
+
+\section{Efficiency}
+\subsection{Word Count}
+Big O: each character of the file is loaded into the buffer and examined only once. The efficiency is therefore O(n), where n is the length of the file being read. \\ \\
+Space: besides the memory needed to store the file, the function only uses: \\
+\begin{itemize}
+	\item 1 int: for counter.
+	\item 1 char: for buffer.
+\end{itemize}
+
+\subsection{Line count}
+Big O: each character of the file is loaded into the buffer and examined only once. The efficiency is therefore O(n), where n is the length of the file being read. \\ \\
+Space: besides the memory needed to store the file, the function uses: \\
+\begin{itemize}
+	\item 1 int: for counter.
+	\item 1 char: for buffer.
+	\item 1 short int: used as a boolean to check if the file ended in a newline.
+\end{itemize}
+
+\subsection{Find Prefix}
+Big O: each character is read into the buffer and examined. In this case, after the character is examined and determined to be no-whitespace, it may have to also be checked for a match against the prefix. In the worst case, this would happen at the first l characters of every word, where l is the number of characters in the prefix. The efficiency is therefore O(ln), where n is the lenght of the file being read and l is the lenght of the prefix. \\ \\
+Space: besides the memory needed to store the file, the function uses:
+\begin{itemize}
+	\item 3 ints: one for counter, one for the current index in the prefix, and one for the lenght of the prefix.
+	\item 1 char: for a buffer.
+	\item 1 char array: to store the prefix as it appears in each word for printing. The array is the same lenght as the prefix itself.
+	\item 1 short int: used as a boolean to check if the word being printed is the first one or not. This is needed to tell if a space needs to be added to the output or not.
+\end{itemize}
+
+\end{document}
