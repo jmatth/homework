@@ -1,0 +1,115 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\title{\bf Algorithms Homework 2}
+\author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+
+\item
+
+  $a = 2\\
+  b = 2\\
+  c = 1\\
+  d = 1\\
+  f(n) = \log n\\
+  f(b) = \log 2 = 1\\
+  \Theta (n^{\log_b a)}\\
+  \Theta (n^{\log_2 2)}\\
+  \Theta (n)\\$
+
+\item Question 2
+
+  I don't know.
+
+\item
+
+  \begin{enumerate}
+    \item \textbf{Lemma.} Perfectly balanced BSF can be searched in $O(\log n)$
+    At worst, one subtree is twice as long, so $2O(\log n)$.
+
+    \item $n \log n$ to build tree ($n$ searches)
+
+    \item $\frac{n - 1}{2} + 1$
+
+    \item $\frac{n\log n}{\frac{n - 1}{2} + 1} + \frac{\log n}{\frac{n - 1}{2}}$
+    
+    \item $\frac{n\log n}{\frac{n - 1}{2} + 1} + \frac{\log n}{\frac{n - 1}{2}}$\\
+    $\lim_{n \to \infty} \frac{n\log n}{\frac{n - 1}{2} + 1} + \lim_{n \to \infty} \frac{\log n}{\frac{n - 1}{2}}$\\
+    $\lim_{n \to \infty} \frac{\log n + \frac{1}{\ln 2}}{\frac{1}{2}} + \lim_{n \to \infty} \frac{\frac{1}{n\ln 2}}{\frac{1}{2}}$\\
+    $\lim_{n \to \infty} \frac{\log n + \frac{1}{\ln 2}}{\frac{1}{2}} + 0$\\
+    $O(\log n)$
+  \end{enumerate}
+
+\item 
+
+  We'll start by proving the following lemma; we'll use this lemma to
+  inductively prove the given statement.
+
+  \textbf{Lemma.} The smallest value in any column is greater than or equal to
+  the smallest value in the previous column.\\
+  \textbf{Proof.} Consider the following matrix:
+
+  $\begin{matrix}
+    a & b & c \\
+    d & e & f \\
+    g & h & i
+  \end{matrix}$
+
+  This matrix has not had its columns sorted yet. So, we'll assume $e$ is the
+  smallest element in its column; therefore $e \ge d$ since the rows are sorted.
+
+  We want to show that $e$ is greater than or equal to the smallest element of the first
+  column, whatever that may be. Well, if $d$ is the smallest element then this
+  is trivially true, by our assumption. If there is an element in the first
+  column which is $\le d$, then clearly it is also smaller than $\le e$;
+  i.e.\ for an arbitrary element $n$, $n \le d \le e$; so $e$ is still larger 
+  than or equal to the smallest element of the first column.
+
+  So, now we'll prove what was asked in the question.
+
+  \textbf{Theorem.} If we have a 2D array with rows in sorted order, the rows
+  will remain sorted after sorting the columns as well. \\
+  \textbf{Proof.} After sorting, the top row of the array will contain the
+  smallest element of each column. So, by our lemma, this row must be sorted.
+
+  Eliminate that row from the array. Now, the new top row contains the new
+  smallest element of that column. By our lemma, again, that row must be
+  sorted. We can continue eliminiating the top row and this process will
+  continue; showing that all rows are still sorted. $\blacksquare$
+
+\item
+
+  Since a hamiltonian cycle is simply a hamiltonian path which is also a
+  cycle, we can simply run each pair of neighbors through the $HamP$ routine.
+  There will be, at maximum, $n^2$ neighbors, where $n$ is the number of nodes;
+  so, this whole operation will take polynomial time.
+
+\item
+  
+  Well, we begin by running the $HamP$ routine on each pair of nodes. 
+  Eventually we'll find a pair of nodes for which the routine returns true.
+  This will take at most $n^2$ times the runtime of $HamP$ time, which is still
+  polynomial.
+
+  Then, once we have two nodes $s$ and $t$ for which this works, we remove $s$
+  and run the subroutine on $t$ with each of $s$'s former neighbors. By 
+  repeating this process every time the subroutine succeeds, we can determine
+  the path.
+
+  Again, since there are at most $n^2$ edges in the graph, we'll need to run the
+  $HamP$ routine a maximum of $n^2$ times. So, the runtime of this entire
+  operation is still polynomial.
+
+\end{enumerate}
+
+\end{document}

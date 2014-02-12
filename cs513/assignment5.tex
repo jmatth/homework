@@ -1,0 +1,45 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{amssymb}
+
+\title{\bf Algorithms Homework 5}
+\author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+
+\item Question 1
+
+    Same process could be used to find minimum product spanning tree since you
+    need to
+    remove the largest edges possible, as in the minimum spanning tree.
+    Therefore, any minimum spanning tree is also a minimum product spanning
+    tree.
+
+\item Question 2
+
+    a. Counterexample: any matrix that does not have 0s on the diagonal cannot
+    fit this because the distance from a leaf to itself must be 0.
+
+\item Question 3
+
+    a. This is true because as long as the distances between two nodes does not
+    need to be an integer, then you can add any number of internal nodes to
+    create any set of distances between them.
+
+    b. There are 3 cases that can occur here:
+    \begin{enumerate}
+        \item $i$ is above or at the same level as $j$ and $k$
+        \item $j$ is above or at the same level as $i$ and $k$
+        \item $k$ is above or at the same level as $j$ and $i$
+    \end{enumerate}
+
+\end{enumerate}
+
+\end{document}

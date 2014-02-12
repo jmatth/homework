@@ -1,0 +1,139 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{amssymb}
+
+\title{\bf Algorithms Homework 2}
+\author{Kaitlin Poskaitis, Joshua Matthews, Russ Frank, and Matt Robinson}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+%Question 1
+\item Suppose that you are given an $k-sorted$ array, in which no element is
+    farther than $k$ positions away from its final (sorted) position. Give an
+    algorithm which will sort such an array. Prove its correctness. Analyse its
+    running time. Note: your algorithm should run faster than $\Theta(nlogn)$,
+    that is it should take advantage of the fact that the array is almost
+    sorted.
+
+
+\textbf{Algorithm:}
+
+\begin{enumerate}
+    \item Given a $k-sorted$ list of $n$ elements, split the list into
+        $\frac{n}{k}$ lists of $k$ elements.
+
+    \item Perform a merge sort on each of the sub-lists. \hfill $O(\frac{n}{k} *
+        klog(k)) = O(nlogk)$
+
+    \item At this point each element will still be no greater than $k$ away from
+        its sorted position.
+
+    \item As in mergesort, merge all of these sorted sub-lists back into a
+        single list. Each of these merges can move each element at most twice as
+        far from it's initial position, but each successive merge will cover
+        twice as many elements and eventually place each element in it's correct
+        position. \hfill $O(n)$
+
+    \item Final efficiency is $O(nlogk) + O(n) = O(nlogk)$
+
+
+\end{enumerate}
+
+
+%Question 2
+\item Consider once again the $k-sorted$ array of the previous problem. Show
+    that any comparison based algorithm for sorting an almost sorted array makes
+    $\Omega(nlogk)$ comparisons.
+
+%Question 3
+\item Prove that if an $n$ node graph has two of the following properties, it has the
+third:
+\begin{itemize}
+    \item It has $n-1$ edges.
+    \item It is connected
+    \item It is acyclic
+\end{itemize}
+
+In order to prove this, we will use 2 lemmas whose proofs are trivial:\\
+1. The fewest number of edges needed to connect $n$ nodes is $n-1$.\\
+2. The fewest number of edges between $n$ nodes that must result in a cycle is
+$n$.
+
+Proof 1: If an $n$ node graph has $n-1$ edges and is connected, then it is
+acyclic.\\
+Because $n-1$ edges is the minimum number of edges to connect $n$ nodes, then
+the graph must be acyclic because if it were cyclic, then it would not contain
+the minimum number of edges to connect the nodes.
+
+Proof 2: If an $n$ node graph is connected and acyclic, then it has $n-1$
+edges.\\
+If a graph is connected and acyclic, this means that it must have at least the
+minimum number of edges to connect the nodes, but less than the number of edges
+where a cycle is require. Therefore, it must have at least $n-1$ edges and less
+than $n$ edges by the lemmas. Therefore, it must have $n-1$ edges.
+
+Proof 3: If an $n$ node graph has $n-1$ edges and is acyclic, then it is
+connected.\\
+Let the first $n-2$ edges be used to connect $n-1$ nodes, which will not create
+a cycle. The last edge can be used to connect the final node, or must create a
+cycle with one of the other nodes. Therefore, it must connect the final node,
+creating a connected graph.
+
+%Question 4
+\item Define a subtree of be any connected subgraph of a tree.
+    \begin{itemize}
+        \item Prove that the number of subtrees of a complete binary tree is not
+            polynomial in the number of nodes.
+        \item Give an example of a class of trees ${T_n}$ where the number of
+            subtrees is a polynomial in the number of nodes.
+    \end{itemize}
+
+%Question 5
+\item Let $F_i$ be the $i$th Fibonacci number. Show that $F_{n+2} = 1 +
+    \sum_{i=0}^n F_i$.
+
+    Proof: By Induction\\
+    \begin{itemize}
+        \item Base Case: $n=0$
+        \begin{itemize}
+            \item First 3 numbers in sequence: 0, 1, 1
+            \item $F_{n+2} = 1 + \sum_{i=0}^n F_i$
+            \item 1 = 1 + 0
+            \item 1 = 1
+            \item Base case holds
+        \end{itemize}
+        \item Assume it holds for everything up to $n$, prove it holds for $n+1$
+        \begin{itemize}
+            \item $F_{n+3} = 1 + \sum_{i=0}^{n+1} F_i$
+            \item $F_{n+3} = F_{n+2} + F_{n+1}$ By induction
+            \item This is the definition of a Fibonacci sequence
+            \item QED
+        \end{itemize}
+    \end{itemize}
+
+%Question 6
+\item Show that if you have a polynomial time algorithm for Hamiltonian Path,
+    that you have a polynomial time algorithm for sorting.
+
+    Proof:\\
+    Assume there is a polynomial time algorithm for Hamiltonian Path.\\
+    Merge sort is a polynomial sorting algorithm.\\
+    QED
+
+%Question 7
+\item The Bounded Degree Spanning Tree (BDST) problem is the following:\\
+    Input: Graph $G$ and integer $k$.\\
+    Output: Yes, if $G$ has a spanning tree where every node has a degree of at
+    most $k$, No, otherwise.\\
+    Suppose there is no polynomial time algorithm for Hamilonian Path. Show that
+    there is no polynomial time algorithm for BDST.
+
+\end{enumerate}
+
+\end{document}
