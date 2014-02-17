@@ -17,7 +17,7 @@ int main(int argc, char const* argv[])
     double avg;
     char *arr;
     pid_t pid;
-    struct timeval start, end;
+    struct timeval start, end, timeDiff;
 
     for (b = 0; b < 11; ++b)
     {
@@ -47,7 +47,8 @@ int main(int argc, char const* argv[])
                 sum += diff;
             } else {
                 close(fd[0]);
-                diff = end.tv_usec - start.tv_usec;
+                timersub(&end, &start, &timeDiff);
+                diff = timeDiff.tv_usec;
                 write(fd[1], &diff, sizeof(diff));
                 close(fd[1]);
                 free(arr);
