@@ -1,12 +1,16 @@
 CC=gcc
-CFLAGS=-Wall -g -Wno-unused-but-set-variable -lm
+CFLAGS=-Wall -g
 
-all: fork
+all: fork pipe
 
 fork: fork.c
 	$(CC) $(CFLAGS) -o fork fork.c
 
+pipe: pipe.c
+	$(CC) $(CFLAGS) -o pipe pipe.c
+
 clean:
 	@rm fork
+	@rm pipe
 
 .PHONY: all clean
