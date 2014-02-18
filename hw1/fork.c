@@ -1,4 +1,3 @@
-#define ITERS 10000
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,56 +8,55 @@
 
 int main(int argc, char const* argv[])
 {
-    int i, j, b;
+    int i, j, bsize;
     int status;
     int fd[2];
-    double sum;
-    double diff;
     double avg;
     char *arr;
     pid_t pid;
-    struct timeval start, end, timeDiff;
+    struct timeval sum, start, end, childEnd, timeDiff;
 
-    for (b = 0; b < 11; ++b)
+    bsize = atoi(argv[1]);
+
+    arr = malloc(1048576 * bsize);
+    for (j = 0; j < 1048576 * bsize; ++j)
     {
-        arr = malloc(1048576 * b);
-        for (j = 0; j < 1048576 * b; ++j)
-        {
-            arr[j] = 1;
-        }
-        sum = 0;
-        avg = 0;
-        for (i = 0; i < 10000; i++) {
-            pipe(fd);
-            gettimeofday(&start, NULL);
-            pid = fork();
-            gettimeofday(&end, NULL);
-
-            if (pid != 0) {
-                waitpid(pid, &status, 0);
-                close(fd[1]);
-                read(fd[0], &diff, sizeof(diff));
-                close(fd[0]);
-                if (diff <= 0)
-                {
-                    --i;
-                    continue;
-                }
-                sum += diff;
-            } else {
-                close(fd[0]);
-                timersub(&end, &start, &timeDiff);
-                diff = timeDiff.tv_usec;
-                write(fd[1], &diff, sizeof(diff));
-                close(fd[1]);
-                free(arr);
-                exit(0);
-            }
-        }
-        avg = (double)sum / 10000;
-        printf("avg time to fork with %dMB allocated: %f\n", (int)pow(2, (double)b), avg);
-        free(arr);
+        arr[j] = 1;
     }
+    sum.tv_sec = 0;
+    sum.tv_usec = 0;
+    for (i = 0; i < 10000; i++) {
+        pipe(fd);
+        gettimeofday(&start, NULL);
+        pid = fork();
+        gettimeofday(&end, NULL);
+
+        if (pid != 0) {
+            waitpid(pid, &status, 0);
+            close(fd[1]);
+            read(fd[0], &childEnd, sizeof(struct timeval));
+            close(fd[0]);
+            if (timercmp(&end, &childEnd, <))
+            {
+                timersub(&end, &start, &timeDiff);
+            }
+            else
+            {
+                timersub(&childEnd, &start, &timeDiff);
+            }
+            timeradd(&sum, &timeDiff, &sum);
+        } else {
+            arr[3] = 3;
+            close(fd[0]);
+            write(fd[1], &end, sizeof(struct timeval));
+            close(fd[1]);
+            free(arr);
+            exit(0);
+        }
+    }
+    avg = ((double)sum.tv_sec * 1000000 + (double)sum.tv_usec) / 10000;
+    printf("avg time to fork with %dMB allocated: %f\n", bsize, avg);
+    free(arr);
 
     return 0;
 }
