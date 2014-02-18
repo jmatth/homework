@@ -16,6 +16,12 @@ int main(int argc, char const* argv[])
     pid_t pid;
     struct timeval sum, start, end, childEnd, timeDiff;
 
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: fork <size>\n");
+        exit(1);
+    }
+
     bsize = atoi(argv[1]);
 
     arr = malloc(1048576 * bsize);
@@ -31,7 +37,7 @@ int main(int argc, char const* argv[])
         pid = fork();
         gettimeofday(&end, NULL);
 
-        if (pid != 0) {
+        if (pid > 0) {
             waitpid(pid, &status, 0);
             close(fd[1]);
             read(fd[0], &childEnd, sizeof(struct timeval));
@@ -45,13 +51,16 @@ int main(int argc, char const* argv[])
                 timersub(&childEnd, &start, &timeDiff);
             }
             timeradd(&sum, &timeDiff, &sum);
-        } else {
+        } else if(pid == 0) {
             arr[3] = 3;
             close(fd[0]);
             write(fd[1], &end, sizeof(struct timeval));
             close(fd[1]);
             free(arr);
             exit(0);
+        } else{
+            fprintf(stderr, "Problem with fork()! I'll just die now. X_X\n");
+            exit(1);
         }
     }
     avg = ((double)sum.tv_sec * 1000000 + (double)sum.tv_usec) / 10000;
