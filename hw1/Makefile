@@ -1,7 +1,10 @@
 CC=gcc
 CFLAGS=-Wall -g
 
-all: cacheLine fork pipe dummy
+all: cacheSize cacheLine fork pipe dummy
+
+cacheSize: cacheSize.c
+	$(CC) $(CFLAGS) -o cacheSize cacheSize.c
 
 cacheLine: cacheLine.c
 	$(CC) $(CFLAGS) -o cacheLine cacheLine.c
@@ -19,6 +22,8 @@ clean:
 	@rm -f fork
 	@rm -f pipe
 	@rm -f dummy
+	@rm -f cacheSize
 	@rm -f cacheLine
+	@rm -f *.dat
 
 .PHONY: all clean

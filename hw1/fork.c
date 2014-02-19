@@ -4,7 +4,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <math.h>
 
 int main(int argc, char const* argv[])
 {
@@ -64,7 +63,7 @@ int main(int argc, char const* argv[])
         }
     }
     avg = ((double)sum.tv_sec * 1000000 + (double)sum.tv_usec) / 10000;
-    printf("avg time to fork with %dMB allocated: %f\n", bsize, avg);
+    printf("%d\t%f\n", bsize, avg);
     free(arr);
 
     return 0;
