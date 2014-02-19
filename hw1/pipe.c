@@ -1,5 +1,5 @@
 #define MB 1048576
-#define ITERS 10000
+#define ITERS 1000
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,6 +36,12 @@ int main(int argc, char const* argv[])
         close(ctp[1]);
 
         arr = malloc(MB * bsize);
+        if (arr == NULL)
+        {
+            fprintf(stderr, "malloc returned null. X_X\n");
+            exit(1);
+        }
+
         for (j = 0; j < MB * bsize; ++j)
         {
             arr[j] = 1;
@@ -44,8 +50,8 @@ int main(int argc, char const* argv[])
         for (i = 0; i < ITERS; ++i)
         {
             gettimeofday(&start, NULL);
-            write(ptc[1], &arr, MB * bsize);
-            read(ctp[0], &arr, MB * bsize);
+            write(ptc[1], arr, MB * bsize);
+            read(ctp[0], arr, MB * bsize);
             gettimeofday(&end, NULL);
 
             timersub(&end, &start, &timeDiff);
@@ -62,10 +68,16 @@ int main(int argc, char const* argv[])
 
         arr = malloc(MB * bsize);
 
+        if (arr == NULL)
+        {
+            fprintf(stderr, "malloc returned null. X_X\n");
+            exit(1);
+        }
+
         for (i = 0; i < ITERS; ++i)
         {
-            read(ptc[0], &arr, MB * bsize);
-            write(ctp[1], &arr, MB * bsize);
+            read(ptc[0], arr, MB * bsize);
+            write(ctp[1], arr, MB * bsize);
         }
         free(arr);
         exit(0);
