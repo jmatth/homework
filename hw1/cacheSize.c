@@ -2,7 +2,7 @@
 #define PAGE_SIZE (8192)
 #define MB (1048576)
 #define ARRAY_SIZE (1024*4096)
-#define BIGNUMBER (10000)
+#define BIGNUMBER (100000)
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
