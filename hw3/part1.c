@@ -23,7 +23,7 @@ void* swap(void *ptrindex)
         pthread_mutex_lock(leftm);
         pthread_mutex_lock(rightm);
 
-        if (*left > *right)
+        if (*left < *right)
         {
             tmp = *left;
             *left = *right;
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     i = 0;
     while (i < nelems - 1)
     {
-        if (arr[i] > arr[i+1])
+        if (arr[i] < arr[i+1])
             // Start over if it's still not sorted.
             i = 0;
         else
