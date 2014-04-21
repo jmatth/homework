@@ -8,6 +8,8 @@ void* secondt(void *unused)
     printf("   Yielding\n");
     mypthread_yield();
     printf("   Back in second thread after yield\n");
+    mypthread_yield();
+    printf("   In second thread, calling exit\n");
     mypthread_exit((void*)0xdeadbeef);
     printf("   ERROR: this should never print\n");
 
@@ -26,7 +28,7 @@ int main(int argc, char *argv[])
     printf("thread address: 0x%x\n", second_thread);
     printf("Past second thread\n");
     mypthread_yield();
-    printf("Trying to get ret from dead second thread\n");
+    printf("Trying to get ret from second thread\n");
     mypthread_join(second_thread, &retval);
     printf("Got 0x%x back from second thread\n", retval);
 

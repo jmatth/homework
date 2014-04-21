@@ -139,7 +139,7 @@ int mypthread_join(mypthread_t thread, void **retval)
 
     real_thread->state = DEAD;
     if (retval != NULL)
-        retval = real_thread->retval;
+        *retval = real_thread->retval;
 
     return 0;
 }
