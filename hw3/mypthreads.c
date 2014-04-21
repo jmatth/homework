@@ -4,28 +4,56 @@
 #include <stdio.h>
 
 int thread_table_l;
-mypthread_t **thread_table;
+mypthread_cont_t **thread_table;
 int curr_thread;
-int last_scheduled;
+
+void swtch(mypthread_t next, mypthread_state state)
+{
+    mypthread_cont_t *this_thread = thread_table[curr_thread];
+
+    this_thread->state = state;
+    thread_table[next]->state = RUNNING;
+    curr_thread = next;
+
+    swapcontext(&(this_thread->context), &(thread_table[next]->context));
+}
+
+void sched(mypthread_state state)
+{
+    int i, next_tid;
+
+    /* FIXME: What if we don't find one? */
+    for (i = 0; i < thread_table_l; ++i)
+        if (thread_table[i] != NULL && thread_table[i]->state == RUNNABLE)
+        {
+            next_tid = i;
+            break;
+        }
+
+    swtch(next_tid, state);
+}
 
 void mypthread_create(mypthread_t *thread, const pthread_attr_t *attr,
                      void* (*func)(void*), void *arg)
 {
-    int i;
+    int i, next_tid;
     const char firstcall = 1;
-    mypthread_t *this_thread;
+    mypthread_cont_t *this_thread;
 
     if (firstcall)
     {
         /* fprintf(stderr, "---first call, making main thread---\n"); */
-        thread_table = calloc(sizeof(mypthread_t*), 256);
+        thread_table = calloc(sizeof(mypthread_cont_t*), 256);
         thread_table_l = 256;
         curr_thread = 0;
         // FIXME: How to make sure this is freed? Will it matter?
-        thread_table[curr_thread] = malloc(sizeof(mypthread_t));
+        thread_table[curr_thread] = malloc(sizeof(mypthread_cont_t));
+        thread_table[curr_thread]->tid = curr_thread;
+        thread_table[curr_thread]->sleeping_on_tid = -1;
+
         getcontext(&(thread_table[0]->context));
 
-        thread_table[curr_thread]->context.uc_stack.ss_sp = malloc(STACKSIZE);
+        thread_table[curr_thread]->context.uc_stack.ss_sp = thread_table[curr_thread]->stack;
         thread_table[curr_thread]->context.uc_stack.ss_size = STACKSIZE;
         thread_table[curr_thread]->context.uc_link = NULL;
 
@@ -35,37 +63,83 @@ void mypthread_create(mypthread_t *thread, const pthread_attr_t *attr,
     this_thread = thread_table[curr_thread];
 
     for (i = 0; i < thread_table_l; ++i)
+    {
         if (thread_table[i] == NULL)
+        {
+            next_tid = i;
+            thread_table[next_tid] = malloc(sizeof(mypthread_cont_t));
+            thread_table[next_tid]->tid = next_tid;
+            thread_table[next_tid]->sleeping_on_tid = -1;
             break;
+        }
+        else if (thread_table[i]->state == DEAD)
+        {
+            next_tid = i;
+            break;
+        }
+    }
 
     /* fprintf(stderr, "Found open thread at %d\n", i); */
 
-    curr_thread = i;
-    thread_table[curr_thread] = thread;
-    getcontext(&(thread->context));
-    thread->context.uc_stack.ss_sp = malloc(STACKSIZE);
-    thread->context.uc_stack.ss_size = STACKSIZE;
-    thread->context.uc_link = &(this_thread->context);
+    *thread = next_tid;
 
-    makecontext(&(thread->context), (void*)func, 1, arg);
-    thread_table[curr_thread]->state = RUNNABLE;
-    thread_table[curr_thread]->state = RUNNING;
-    swapcontext(&(this_thread->context), &(thread->context));
+    getcontext(&(thread_table[next_tid]->context));
+    thread_table[next_tid]->context.uc_stack.ss_sp = thread_table[next_tid]->stack;
+    thread_table[next_tid]->context.uc_stack.ss_size = STACKSIZE;
+    thread_table[next_tid]->context.uc_link = &(this_thread->context);
+
+    makecontext(&(thread_table[next_tid]->context), (void*)func, 1, arg);
+
+    swtch(next_tid, RUNNABLE);
+
+    /* thread_table[curr_thread]->state = RUNNABLE; */
+    /* thread_table[curr_thread]->state = RUNNING; */
+    /* swapcontext(&(this_thread->context), &(thread->context)); */
 }
 
 void  mypthread_yield()
 {
-    mypthread_t *this_thread = thread_table[curr_thread];
+    sched(RUNNABLE);
+}
 
-    if (thread_table[++last_scheduled] == NULL)
-        last_scheduled = 0;
+void mypthread_exit(void *retval)
+{
+    int i;
+    thread_table[curr_thread]->retval = retval;
 
-    while(thread_table[last_scheduled] == NULL)
-        ++last_scheduled;
+    for (i = 0; i < thread_table_l; ++i)
+    {
+        if (thread_table[i] != NULL &&
+            thread_table[i]->sleeping_on_tid == thread_table[curr_thread]->tid)
+        {
+            swtch(i, DEAD);
+        }
+    }
 
-    mypthread_t *next_thread = thread_table[last_scheduled];
+    sched(ZOMBIE);
+}
 
-    this_thread->state = RUNNABLE;
-    next_thread->state = RUNNING;
-    swapcontext(&(this_thread->context), &(next_thread->context));
+int mypthread_join(mypthread_t thread, void **retval)
+{
+    mypthread_cont_t *this_thread;
+    mypthread_cont_t *real_thread = thread_table[thread];
+
+    if (real_thread->state == ZOMBIE)
+    {
+        real_thread->state = DEAD;
+        if (retval != NULL)
+            *retval = real_thread->retval;
+        return 0;
+    }
+
+    this_thread = thread_table[curr_thread];
+    this_thread->sleeping_on_tid = real_thread->tid;
+
+    sched(SLEEPING);
+
+    real_thread->state = DEAD;
+    if (retval != NULL)
+        retval = real_thread->retval;
+
+    return 0;
 }

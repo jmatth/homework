@@ -7,24 +7,28 @@ void* secondt(void *unused)
     printf("   In second thread\n");
     printf("   Yielding\n");
     mypthread_yield();
-    printf("   Back in second thread after yield");
+    printf("   Back in second thread after yield\n");
+    mypthread_exit((void*)0xdeadbeef);
+    printf("   ERROR: this should never print\n");
+
     return NULL;
-    /* mypthread_yield(); */
 }
 
 int main(int argc, char *argv[])
 {
-    mypthread_t *second_thread;
+    mypthread_t second_thread;
+    void *retval = NULL;
 
     printf("Starting main\n");
 
-    second_thread = malloc(sizeof(mypthread_t));
-
     printf("Starting second thread\n");
-    mypthread_create(second_thread, NULL, &secondt, NULL);
+    mypthread_create(&second_thread, NULL, &secondt, NULL);
+    printf("thread address: 0x%x\n", second_thread);
     printf("Past second thread\n");
     mypthread_yield();
-    printf("Back in main for last time\n");
+    printf("Trying to get ret from dead second thread\n");
+    mypthread_join(second_thread, &retval);
+    printf("Got 0x%x back from second thread\n", retval);
 
     return 0;
 }

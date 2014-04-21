@@ -13,7 +13,7 @@ test: mypthreads.o test.c
 	$(CC) $(CFLAGS) -o test test.c mypthreads.o
 
 clean:
-	@rm -rf part1
+	@rm -rf part1 test
 	@rm -rf *.o
 
 .PHONY: clean
