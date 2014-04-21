@@ -3,6 +3,8 @@
 #ifndef MYPTHREAD_H
 #define MYPTHREAD_H 1
 
+#define STACKSIZE 16384
+
 enum _mypthread_state {
     RUNNING,
     SLEEPING,
@@ -18,7 +20,7 @@ struct mypthread {
 
 typedef struct mypthread mypthread_t;
 
-void mypthread_create(mypthread_t *, const pthread_attr_t *, void* (*)(void*));
+void mypthread_create(mypthread_t *, const pthread_attr_t *, void* (*)(void*), void*);
 
 void mypthread_yield();
 
