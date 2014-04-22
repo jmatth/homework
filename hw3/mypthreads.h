@@ -5,6 +5,8 @@
 
 #define STACKSIZE 16384
 
+#define EBUSY 1
+
 enum _mypthread_state {
     RUNNING,
     SLEEPING,
@@ -29,6 +31,7 @@ struct mypthread_cont {
 struct mypthread_mutex {
     short int locked;
     long int id;
+    int locked_by;
 };
 
 /**********************

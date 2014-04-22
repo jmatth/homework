@@ -213,6 +213,7 @@ void mypthread_mutex_init(mypthread_mutex_t *mutex, mypthread_mutexattr_t *attr)
     LOCKLIB;
     mutex->locked = 0;
     mutex->id = next_mutex_id++;
+    mutex->locked_by = -1;
     UNLOCKLIB;
 }
 
@@ -227,6 +228,7 @@ int mypthread_mutex_lock(mypthread_mutex_t *mutex)
     }
 
     mutex->locked = 1;
+    mutex->locked_by = curr_thread;
 
     UNLOCKLIB;
     return 0;
@@ -239,6 +241,7 @@ int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
     int i;
 
     mutex->locked = 0;
+    mutex->locked_by = -1;
 
     for (i = 0; i < thread_table_l; ++i)
     {
@@ -255,6 +258,31 @@ int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
     return 0;
 }
 
+int mypthread_mutex_trylock(mypthread_mutex_t *mutex)
+{
+    LOCKLIB;
+
+    if (mutex->locked)
+    {
+        UNLOCKLIB;
+        return EBUSY;
+    }
+
+    mutex->locked = 1;
+
+    UNLOCKLIB;
+    return 0;
+}
+
+int mypthread_mutex_destroy(mypthread_mutex_t *mutex)
+{
+    return 0;
+}
+
+
+/**************************
+ *  Internal queue stuff  *
+ **************************/
 
 void myqueueinit()
 {
