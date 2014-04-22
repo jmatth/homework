@@ -22,6 +22,7 @@ struct mypthread_cont {
     char stack[STACKSIZE];
     void *retval;
     int sleeping_on_tid;
+    short int in_mypthreads;
 };
 
 typedef struct mypthread_cont mypthread_cont_t;
@@ -35,5 +36,7 @@ void mypthread_yield();
 int mypthread_join(mypthread_t, void**);
 
 void mypthread_exit();
+
+void sched();
 
 #endif

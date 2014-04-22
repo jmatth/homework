@@ -4,13 +4,14 @@
 
 void* secondt(void *unused)
 {
+    int i;
+
     printf("   In second thread\n");
-    printf("   Yielding\n");
-    mypthread_yield();
-    printf("   Back in second thread after yield\n");
-    mypthread_yield();
-    printf("   In second thread, calling exit\n");
-    mypthread_exit((void*)0xdeadbeef);
+    for(i = 0; i < 1000000; i++)
+    {
+        printf("------->%d in 2nd thread\n", i);
+    }
+    mypthread_exit(0xdeadbeef);
     printf("   ERROR: this should never print\n");
 
     return NULL;
@@ -18,6 +19,7 @@ void* secondt(void *unused)
 
 int main(int argc, char *argv[])
 {
+    int i;
     mypthread_t second_thread;
     void *retval = NULL;
 
@@ -25,10 +27,12 @@ int main(int argc, char *argv[])
 
     printf("Starting second thread\n");
     mypthread_create(&second_thread, NULL, &secondt, NULL);
-    printf("thread address: 0x%x\n", second_thread);
-    printf("Past second thread\n");
-    mypthread_yield();
-    printf("Trying to get ret from second thread\n");
+
+    for(i = 0; i < 10000; i++)
+    {
+        printf("%d in main thread\n", i);
+    }
+
     mypthread_join(second_thread, &retval);
     printf("Got 0x%x back from second thread\n", retval);
 
