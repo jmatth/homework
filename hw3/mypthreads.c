@@ -6,13 +6,20 @@
 #include "mypthreads.h"
 #include "mypthread_queue.h"
 
+#define CLOCKTICKSEC  0
+#define CLOCKTICKUSEC 10000
+
 int thread_table_l;
 mypthread_cont_t **thread_table;
 int curr_thread;
 
+long int next_mutex_id = 0;
+
 queue threadqueue;
 
 struct itimerval timer;
+
+short int firstcall = 1;
 
 #define LOCKLIB thread_table[curr_thread]->in_mypthreads = 1
 #define UNLOCKLIB thread_table[curr_thread]->in_mypthreads = 0
@@ -44,7 +51,7 @@ inline void swtch(mypthread_t next, mypthread_state state)
 
 inline void sched(mypthread_state state)
 {
-    int i, next_tid;
+    int next_tid;
 
     next_tid = mydequeue();
 
@@ -54,11 +61,35 @@ inline void sched(mypthread_state state)
     swtch(next_tid, state);
 }
 
+inline void init_main_thread()
+{
+    thread_table = calloc(sizeof(mypthread_cont_t*), 256);
+    thread_table_l = 256;
+    curr_thread = 0;
+    // FIXME: How to make sure this is freed? Will it matter?
+    thread_table[curr_thread] = malloc(sizeof(mypthread_cont_t));
+
+    init_thread(thread_table[curr_thread], curr_thread);
+
+    LOCKLIB;
+
+    thread_table[curr_thread]->context.uc_link = NULL;
+    thread_table[curr_thread]->state = RUNNING;
+
+    myqueueinit();
+
+    firstcall = 0;
+    signal(SIGVTALRM, timer_handler);
+
+    init_timer();
+}
+
 inline void init_thread(mypthread_cont_t *thread, int tid)
 {
     getcontext(&(thread->context));
     thread->tid = tid;
     thread->sleeping_on_tid = -1;
+    thread->sleeping_on_mutex = -1;
     thread->context.uc_stack.ss_sp = thread->stack;
     thread->context.uc_stack.ss_size = STACKSIZE;
     thread->context.uc_link = &(thread_table[curr_thread]->context);
@@ -68,43 +99,26 @@ inline void init_thread(mypthread_cont_t *thread, int tid)
 
 void init_timer()
 {
-    timer.it_interval.tv_sec = 0;
-    timer.it_interval.tv_usec = 1;
+    timer.it_interval.tv_sec = CLOCKTICKSEC;
+    timer.it_interval.tv_usec = CLOCKTICKUSEC;
 
-    timer.it_value.tv_sec = 0;
-    timer.it_value.tv_usec = 1;
+    timer.it_value.tv_sec = CLOCKTICKSEC;
+    timer.it_value.tv_usec = CLOCKTICKUSEC;
 
     setitimer(ITIMER_VIRTUAL, &timer, NULL);
 }
+
+/**********************************
+ *  Cooperative thread functions  *
+ **********************************/
 
 void mypthread_create(mypthread_t *thread, const pthread_attr_t *attr,
                      void* (*func)(void*), void *arg)
 {
     int i, next_tid;
-    short int firstcall = 1;
 
     if (firstcall)
-    {
-        thread_table = calloc(sizeof(mypthread_cont_t*), 256);
-        thread_table_l = 256;
-        curr_thread = 0;
-        // FIXME: How to make sure this is freed? Will it matter?
-        thread_table[curr_thread] = malloc(sizeof(mypthread_cont_t));
-
-        init_thread(thread_table[curr_thread], curr_thread);
-
-        LOCKLIB;
-
-        thread_table[curr_thread]->context.uc_link = NULL;
-        thread_table[curr_thread]->state = RUNNING;
-
-        myqueueinit();
-
-        firstcall = 0;
-        signal(SIGVTALRM, timer_handler);
-
-        init_timer();
-    }
+        init_main_thread();
 
     LOCKLIB;
 
@@ -188,6 +202,58 @@ int mypthread_join(mypthread_t thread, void **retval)
 }
 
 
+/*********************
+ *  Synchronization  *
+ *********************/
+void mypthread_mutex_init(mypthread_mutex_t *mutex, mypthread_mutexattr_t *attr)
+{
+    if (firstcall)
+        init_main_thread();
+
+    LOCKLIB;
+    mutex->locked = 0;
+    mutex->id = next_mutex_id++;
+    UNLOCKLIB;
+}
+
+int mypthread_mutex_lock(mypthread_mutex_t *mutex)
+{
+    LOCKLIB;
+
+    while (mutex->locked)
+    {
+        thread_table[curr_thread]->sleeping_on_mutex = mutex->id;
+        sched(SLEEPING);
+    }
+
+    mutex->locked = 1;
+
+    UNLOCKLIB;
+    return 0;
+}
+
+int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
+{
+    LOCKLIB;
+
+    int i;
+
+    mutex->locked = 0;
+
+    for (i = 0; i < thread_table_l; ++i)
+    {
+        if (thread_table[i] != NULL && thread_table[i]->sleeping_on_mutex == mutex->id)
+        {
+            myenqueue(i);
+        }
+    }
+
+    sched(RUNNABLE);
+
+    UNLOCKLIB;
+
+    return 0;
+}
 
 
 void myqueueinit()

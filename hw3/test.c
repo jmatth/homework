@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+mypthread_mutex_t *mutex;
+
 void* secondt(void *unused)
 {
-    int i;
-
     printf("   In second thread\n");
-    for(i = 0; i < 1000000; i++)
-    {
-        printf("------->%d in 2nd thread\n", i);
-    }
+    printf("   Trying to lock mutex in second thread\n");
+    mypthread_mutex_lock(mutex);
+    printf("   Got the mutex in second thread\n");
+
     mypthread_exit(0xdeadbeef);
     printf("   ERROR: this should never print\n");
 
@@ -19,19 +19,24 @@ void* secondt(void *unused)
 
 int main(int argc, char *argv[])
 {
-    int i;
     mypthread_t second_thread;
     void *retval = NULL;
 
     printf("Starting main\n");
 
+    printf("Malloc-ing mutex\n");
+    mutex = malloc(sizeof(mypthread_mutex_t));
+    printf("Initializing mutex\n");
+    mypthread_mutex_init(mutex, NULL);
+
+    printf("Locking mutex in main\n");
+    mypthread_mutex_lock(mutex);
+
     printf("Starting second thread\n");
     mypthread_create(&second_thread, NULL, &secondt, NULL);
 
-    for(i = 0; i < 10000; i++)
-    {
-        printf("%d in main thread\n", i);
-    }
+    printf("Unlocking mutex in main thread\n");
+    mypthread_mutex_unlock(mutex);
 
     mypthread_join(second_thread, &retval);
     printf("Got 0x%x back from second thread\n", retval);
