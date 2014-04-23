@@ -87,12 +87,12 @@ inline void init_thread(mypthread_cont_t *thread, int tid)
 {
     getcontext(&(thread->context));
     thread->tid = tid;
-    thread->sleeping_on_tid = -1;
     thread->context.uc_stack.ss_sp = thread->stack;
     thread->context.uc_stack.ss_size = STACKSIZE;
     thread->context.uc_link = &(thread_table[curr_thread]->context);
     thread->state = RUNNABLE;
     thread->in_mypthreads = 0;
+    thread->sleeping_on = -1;
 }
 
 void init_timer()
@@ -155,17 +155,10 @@ void  mypthread_yield()
 void mypthread_exit(void *retval)
 {
     LOCKLIB;
-    int i;
     thread_table[curr_thread]->retval = retval;
 
-    for (i = 0; i < thread_table_l; ++i)
-    {
-        if (thread_table[i] != NULL &&
-            thread_table[i]->sleeping_on_tid == thread_table[curr_thread]->tid)
-        {
-            swtch(i, DEAD);
-        }
-    }
+    if (thread_table[curr_thread]->sleeping_on != -1)
+            swtch(thread_table[curr_thread]->sleeping_on, DEAD);
 
     sched(ZOMBIE);
     UNLOCKLIB;
@@ -174,7 +167,6 @@ void mypthread_exit(void *retval)
 int mypthread_join(mypthread_t thread, void **retval)
 {
     LOCKLIB;
-    mypthread_cont_t *this_thread;
     mypthread_cont_t *real_thread = thread_table[thread];
 
     if (real_thread->state == ZOMBIE)
@@ -186,8 +178,7 @@ int mypthread_join(mypthread_t thread, void **retval)
         return 0;
     }
 
-    this_thread = thread_table[curr_thread];
-    this_thread->sleeping_on_tid = real_thread->tid;
+    real_thread->sleeping_on = curr_thread;
 
     sched(SLEEPING);
 

@@ -1,5 +1,4 @@
 #include <ucontext.h>
-#include "mypthread_queue.h"
 
 #ifndef MYPTHREAD_H
 #define MYPTHREAD_H 1
@@ -18,16 +17,6 @@ enum _mypthread_state {
 
 typedef enum _mypthread_state mypthread_state;
 
-struct mypthread_cont {
-    int tid;
-    mypthread_state state;
-    ucontext_t context;
-    char stack[STACKSIZE];
-    void *retval;
-    int sleeping_on_tid;
-    short int in_mypthreads;
-};
-
 struct threadnode {
     struct threadnode *next;
     int tid;
@@ -37,6 +26,16 @@ typedef struct _threadqueue {
     struct threadnode *front;
     struct threadnode *end;
 } threadqueue;
+
+struct mypthread_cont {
+    int tid;
+    mypthread_state state;
+    ucontext_t context;
+    char stack[STACKSIZE];
+    void *retval;
+    int sleeping_on;
+    short int in_mypthreads;
+};
 
 struct mypthread_mutex {
     short int locked;
