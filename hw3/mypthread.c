@@ -23,6 +23,27 @@ short int firstcall = 1;
 #define LOCKLIB thread_table[curr_thread]->in_mypthreads = 1
 #define UNLOCKLIB thread_table[curr_thread]->in_mypthreads = 0
 
+void exit_cleanup(){
+    LOCKLIB;
+
+    int i;
+
+    if (firstcall)
+        return;
+
+    for (i = 0; i < thread_table_l; i++)
+    {
+        if (thread_table[i] == NULL)
+            continue;
+
+        free(thread_table[i]);
+    }
+
+    free(thread_table);
+
+    myqueueempty(&mainqueue);
+}
+
 void timer_handler(int sig)
 {
     if (!thread_table[curr_thread]->in_mypthreads)
@@ -65,7 +86,6 @@ inline void init_main_thread()
     thread_table = calloc(sizeof(mypthread_cont_t*), 256);
     thread_table_l = 256;
     curr_thread = 0;
-    // FIXME: How to make sure this is freed? Will it matter?
     thread_table[curr_thread] = malloc(sizeof(mypthread_cont_t));
 
     init_thread(thread_table[curr_thread], curr_thread);
@@ -79,6 +99,7 @@ inline void init_main_thread()
 
     firstcall = 0;
     signal(SIGVTALRM, timer_handler);
+    atexit(exit_cleanup);
 
     init_timer();
 }
