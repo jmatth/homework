@@ -141,7 +141,7 @@ void mypthread_create(mypthread_t *thread, const pthread_attr_t *attr,
 
     makecontext(&(thread_table[next_tid]->context), (void*)func, 1, arg);
 
-    swtch(next_tid, RUNNABLE);
+    myenqueue(next_tid, &mainqueue);
     UNLOCKLIB;
 }
 
@@ -158,7 +158,7 @@ void mypthread_exit(void *retval)
     thread_table[curr_thread]->retval = retval;
 
     if (thread_table[curr_thread]->sleeping_on != -1)
-            swtch(thread_table[curr_thread]->sleeping_on, DEAD);
+        myenqueue(thread_table[curr_thread]->sleeping_on, &mainqueue);
 
     sched(ZOMBIE);
     UNLOCKLIB;
@@ -243,7 +243,8 @@ int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
 
     next_tid = mydequeue(&(mutex->sleeping_on));
 
-    swtch(next_tid, RUNNABLE);
+    if (next_tid != -1)
+        myenqueue(next_tid, &mainqueue);
 
     UNLOCKLIB;
 

@@ -95,4 +95,8 @@ int mypthread_mutex_lock(mypthread_mutex_t*);
 
 int mypthread_mutex_unlock(mypthread_mutex_t*);
 
+int mypthread_mutex_trylock(mypthread_mutex_t*);
+
+int mypthread_mutex_destroy(mypthread_mutex_t*);
+
 #endif
