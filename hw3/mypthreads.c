@@ -4,7 +4,6 @@
 #include <sys/time.h>
 #include <signal.h>
 #include "mypthreads.h"
-#include "mypthread_queue.h"
 
 #define CLOCKTICKSEC  0
 #define CLOCKTICKUSEC 10000
@@ -15,7 +14,7 @@ int curr_thread;
 
 long int next_mutex_id = 0;
 
-queue threadqueue;
+threadqueue mainqueue;
 
 struct itimerval timer;
 
@@ -40,7 +39,7 @@ inline void swtch(mypthread_t next, mypthread_state state)
     mypthread_cont_t *this_thread = thread_table[curr_thread];
 
     if (state == RUNNABLE)
-        myenqueue(curr_thread);
+        myenqueue(curr_thread, &mainqueue);
 
     this_thread->state = state;
     thread_table[next]->state = RUNNING;
@@ -53,7 +52,7 @@ inline void sched(mypthread_state state)
 {
     int next_tid;
 
-    next_tid = mydequeue();
+    next_tid = mydequeue(&mainqueue);
 
     if(next_tid == -1)
         return;
@@ -76,7 +75,7 @@ inline void init_main_thread()
     thread_table[curr_thread]->context.uc_link = NULL;
     thread_table[curr_thread]->state = RUNNING;
 
-    myqueueinit();
+    myqueueinit(&mainqueue);
 
     firstcall = 0;
     signal(SIGVTALRM, timer_handler);
@@ -89,7 +88,6 @@ inline void init_thread(mypthread_cont_t *thread, int tid)
     getcontext(&(thread->context));
     thread->tid = tid;
     thread->sleeping_on_tid = -1;
-    thread->sleeping_on_mutex = -1;
     thread->context.uc_stack.ss_sp = thread->stack;
     thread->context.uc_stack.ss_size = STACKSIZE;
     thread->context.uc_link = &(thread_table[curr_thread]->context);
@@ -211,9 +209,12 @@ void mypthread_mutex_init(mypthread_mutex_t *mutex, mypthread_mutexattr_t *attr)
         init_main_thread();
 
     LOCKLIB;
+
     mutex->locked = 0;
     mutex->id = next_mutex_id++;
     mutex->locked_by = -1;
+    myqueueinit(&(mutex->sleeping_on));
+
     UNLOCKLIB;
 }
 
@@ -223,7 +224,7 @@ int mypthread_mutex_lock(mypthread_mutex_t *mutex)
 
     while (mutex->locked)
     {
-        thread_table[curr_thread]->sleeping_on_mutex = mutex->id;
+        myenqueue(curr_thread, &(mutex->sleeping_on));
         sched(SLEEPING);
     }
 
@@ -238,20 +239,20 @@ int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
 {
     LOCKLIB;
 
-    int i;
+    int next_tid;
+
+    if (mutex->locked_by != curr_thread)
+    {
+        UNLOCKLIB;
+        return 1;
+    }
 
     mutex->locked = 0;
     mutex->locked_by = -1;
 
-    for (i = 0; i < thread_table_l; ++i)
-    {
-        if (thread_table[i] != NULL && thread_table[i]->sleeping_on_mutex == mutex->id)
-        {
-            myenqueue(i);
-        }
-    }
+    next_tid = mydequeue(&(mutex->sleeping_on));
 
-    sched(RUNNABLE);
+    swtch(next_tid, RUNNABLE);
 
     UNLOCKLIB;
 
@@ -276,6 +277,7 @@ int mypthread_mutex_trylock(mypthread_mutex_t *mutex)
 
 int mypthread_mutex_destroy(mypthread_mutex_t *mutex)
 {
+    myqueueempty(&(mutex->sleeping_on));
     return 0;
 }
 
@@ -284,46 +286,56 @@ int mypthread_mutex_destroy(mypthread_mutex_t *mutex)
  *  Internal queue stuff  *
  **************************/
 
-void myqueueinit()
+void myqueueinit(threadqueue *queue)
 {
-    threadqueue.front = NULL;
-    threadqueue.end = NULL;
+    queue->front = NULL;
+    queue->end = NULL;
 }
 
-int myenqueue(mypthread_t thread)
+void myqueueempty(threadqueue *queue)
 {
-    threadnode *node;
+    while(mydequeue(queue) != -1);
+}
 
-    node = malloc(sizeof(threadnode));
+int myenqueue(mypthread_t thread, threadqueue *queue)
+{
+    struct threadnode *node;
+
+    node = malloc(sizeof(struct threadnode));
     node->tid = thread;
     node->next = NULL;
 
-    if (threadqueue.end == NULL)
+    if (queue->end == NULL)
     {
-        threadqueue.end = node;
-        threadqueue.front = node;
+        queue->end = node;
+        queue->front = node;
     }
     else
     {
-        threadqueue.end->next = node;
-        threadqueue.end = node;
+        queue->end->next = node;
+        queue->end = node;
     }
 
     return 0;
 }
 
-mypthread_t mydequeue()
+mypthread_t mydequeue(threadqueue *queue)
 {
     mypthread_t ret;
+    struct threadnode *curr_front;
 
-    if (threadqueue.front == NULL)
+    if (queue->front == NULL)
         return -1;
 
-    ret = threadqueue.front->tid;
+    curr_front = queue->front;
 
-    threadqueue.front = threadqueue.front->next;
-    if (threadqueue.front == NULL)
-        threadqueue.end = NULL;
+    ret = curr_front->tid;
+
+    queue->front = curr_front->next;
+    if (queue->front == NULL)
+        queue->end = NULL;
+
+    free(curr_front);
 
     return ret;
 }
