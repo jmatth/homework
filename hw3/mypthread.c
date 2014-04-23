@@ -244,7 +244,7 @@ int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
     next_tid = mydequeue(&(mutex->sleeping_on));
 
     if (next_tid != -1)
-        myenqueue(next_tid, &mainqueue);
+        swtch(next_tid, RUNNABLE);
 
     UNLOCKLIB;
 
