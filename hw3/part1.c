@@ -34,6 +34,8 @@ void* swap(void *ptrindex)
         pthread_mutex_unlock(rightm);
     }
 
+    pthread_exit(NULL);
+
     return NULL;
 }
 
