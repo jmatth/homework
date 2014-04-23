@@ -1,4 +1,4 @@
-#include "mypthreads.h"
+#include "mypthread.h"
 #include <stdlib.h>
 #include <stdio.h>
 

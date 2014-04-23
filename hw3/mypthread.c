@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <signal.h>
-#include "mypthreads.h"
+#include "mypthread.h"
 
 #define CLOCKTICKSEC  0
 #define CLOCKTICKUSEC 10000
