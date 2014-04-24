@@ -30,8 +30,10 @@ void* swap(void *ptrindex)
             *right = tmp;
         }
 
-        mypthread_mutex_unlock(leftm);
         mypthread_mutex_unlock(rightm);
+        mypthread_mutex_unlock(leftm);
+
+        mypthread_yield();
     }
 
     mypthread_exit(NULL);
@@ -70,12 +72,22 @@ int main(int argc, char *argv[])
     i = 0;
     while (i < nelems - 1)
     {
+        mypthread_mutex_lock(&mutexes[i]);
+        mypthread_mutex_lock(&mutexes[i+1]);
+
         if (arr[i] < arr[i+1])
+        {
+            mypthread_mutex_unlock(&mutexes[i+1]);
+            mypthread_mutex_unlock(&mutexes[i]);
             // Start over if it's still not sorted.
             i = 0;
+        }
         else
-            // Otherwise keep going.
+        {
+            mypthread_mutex_unlock(&mutexes[i+1]);
+            mypthread_mutex_unlock(&mutexes[i]);
             i++;
+        }
     }
 
     // Checked the whole array and it's good, set the sorted flag.
