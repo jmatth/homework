@@ -6,7 +6,7 @@
 #include "mypthread.h"
 
 #define CLOCKTICKSEC  0
-#define CLOCKTICKUSEC 10000
+#define CLOCKTICKUSEC 5
 
 int thread_table_l;
 mypthread_cont_t **thread_table;
@@ -265,7 +265,13 @@ int mypthread_mutex_unlock(mypthread_mutex_t *mutex)
     next_tid = mydequeue(&(mutex->sleeping_on));
 
     if (next_tid != -1)
+    {
         swtch(next_tid, RUNNABLE);
+    }
+    else
+    {
+        sched(RUNNABLE);
+    }
 
     UNLOCKLIB;
 
