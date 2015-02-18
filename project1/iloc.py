@@ -203,12 +203,15 @@ class ILoc(object):
 
     """Docstring for ILoc. """
 
-    def __init__(self, reader, target_registers):
+    def __init__(self, target_registers, reader=None):
 
         self.logger = logging.getLogger('allocator.iloc')
 
         self.program = []
         self.target_registers = target_registers
+
+        if reader is None:
+            return
 
         for line in reader:
             line = line.strip()
@@ -217,6 +220,12 @@ class ILoc(object):
 
             # FIXME: this doesn't detect missing commas
             self.program.append(Instruction(line=line))
+
+    def add_instruction(self, instr):
+        self.program.append(instr)
+
+    def append_instructions(self, instrs):
+        self.program += instrs
 
     def get_register_count(self):
         reg_count = defaultdict(lambda: 0)
@@ -240,7 +249,10 @@ class ILoc(object):
         if target_registers < len(FEASIBLE_SET):
             raise Exception("Too few registers on target machine")
 
-        new_program = [Instruction('loadI', 1024, out1=FEASIBLE_SET[0])]
+        new_program = ILoc(self.target_registers)
+        new_program.add_instruction(
+            Instruction('loadI', 1024, out1=FEASIBLE_SET[0])
+        )
         register_mappings = {}
         spill_mappings = SpillDict()
         used_registers = self.get_sorted_registers()
@@ -251,8 +263,12 @@ class ILoc(object):
             reg_number += 1
 
         for instr in self.program:
-            new_program += instr.create_mapped_instructions(register_mappings,
-                                                            spill_mappings)
+            new_program.append_instructions(
+                instr.create_mapped_instructions(
+                    register_mappings,
+                    spill_mappings
+                )
+            )
 
         return new_program
 

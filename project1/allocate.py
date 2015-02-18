@@ -11,6 +11,7 @@ VALID_ALGOS = ['b', 't', 's']
 def main(target_registers, algo, file_name):
     logging.basicConfig()
     logger = logging.getLogger('allocator')
+    logger.setLevel(logging.DEBUG)
     if algo not in VALID_ALGOS:
         print 'ERROR: invalid allocation algo "%s"' % algo
         sys.exit(1)
@@ -25,10 +26,9 @@ def main(target_registers, algo, file_name):
         print 'ERROR: cannot open input file %s' % input_file
         sys.exit(1)
 
-    original_program = iloc.ILoc(input_file, target_registers)
+    original_program = iloc.ILoc(target_registers, input_file)
     if algo == 's':
-        for instr in original_program.spill_no_live(target_registers):
-            print instr
+        print original_program.spill_no_live(target_registers)
 
 
 if __name__ == '__main__':
