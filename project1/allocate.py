@@ -3,19 +3,21 @@
 
 import sys
 import iloc
-import operator
+import logging
 
 VALID_ALGOS = ['b', 't', 's']
 
 
 def main(target_registers, algo, file_name):
+    logging.basicConfig()
+    logger = logging.getLogger('allocator')
     if algo not in VALID_ALGOS:
         print 'ERROR: invalid allocation algo "%s"' % algo
         sys.exit(1)
 
-    if target_registers < iloc.FEASIBLE_SET_NUM:
+    if target_registers < len(iloc.FEASIBLE_SET):
         print ('ERROR: to few registers on target architecture, need at lest'
-               ' %d' % iloc.FEASIBLE_SET_NUM)
+               ' %d' % len(iloc.FEASIBLE_SET))
 
     try:
         input_file = open(file_name)

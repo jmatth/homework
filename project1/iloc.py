@@ -1,9 +1,8 @@
 import re
+import logging
 from collections import defaultdict
 
-FEASIBLE_SET_NUM = 2
-FEASIBLE_SET = ['r%d' % (i + 1) for i in range(FEASIBLE_SET_NUM)]
-BASE_REGISTER = 'r0'
+FEASIBLE_SET = ['r%d' % i for i in range(3)]
 
 OPCODES = [
     'loadI',
@@ -37,11 +36,11 @@ def is_register(ident):
     return False
 
 
-class spillDict(defaultdict):
+class SpillDict(defaultdict):
 
     def __init__(self):
         self.mem_offset = 0
-        super(spillDict, self).__init__(self._newmap)
+        super(SpillDict, self).__init__(self._newmap)
 
     def _newmap(self):
         self.mem_offset -= 4
@@ -146,7 +145,7 @@ class Instruction(object):
         if in1 in rmaps:
             in1 = rmaps[in1]
         elif is_register(in1):
-            in1tmp = FEASIBLE_SET[0]
+            in1tmp = FEASIBLE_SET[1]
             pre_instructions += self.generate_load(mmaps[in1], in1tmp)
             in1 = in1tmp
 
@@ -154,7 +153,7 @@ class Instruction(object):
         if in2 in rmaps:
             in2 = rmaps[in2]
         elif is_register(in2):
-            in2tmp = FEASIBLE_SET[1]
+            in2tmp = FEASIBLE_SET[2]
             pre_instructions += self.generate_load(mmaps[in2], in2tmp)
             in2 = in2tmp
 
@@ -162,7 +161,7 @@ class Instruction(object):
         if out1 in rmaps:
             out1 = rmaps[out1]
         elif is_register(out1) and not self.opcode.startswith('store'):
-            out1tmp = FEASIBLE_SET[1]
+            out1tmp = FEASIBLE_SET[2]
             post_instructions += self.generate_store(out1tmp, mmaps[out1])
             out1 = out1tmp
 
@@ -174,14 +173,14 @@ class Instruction(object):
 
     def generate_load(self, src, dst):
         return [
-            Instruction('addI', BASE_REGISTER, src, out1=dst),
+            Instruction('addI', FEASIBLE_SET[0], src, out1=dst),
             Instruction('load', dst, out1=dst)
         ]
 
     def generate_store(self, src, dst):
-        util_reg = FEASIBLE_SET[0]
+        util_reg = FEASIBLE_SET[1]
         return [
-            Instruction('addI', BASE_REGISTER, dst, out1=util_reg),
+            Instruction('addI', FEASIBLE_SET[0], dst, out1=util_reg),
             Instruction('store', src, out1=util_reg)
         ]
 
@@ -205,7 +204,8 @@ class ILoc(object):
     """Docstring for ILoc. """
 
     def __init__(self, reader, target_registers):
-        """TODO: to be defined1. """
+
+        self.logger = logging.getLogger('allocator.iloc')
 
         self.program = []
         self.target_registers = target_registers
@@ -237,15 +237,16 @@ class ILoc(object):
         )
 
     def spill_no_live(self, target_registers):
-        if target_registers < FEASIBLE_SET_NUM:
+        if target_registers < len(FEASIBLE_SET):
             raise Exception("Too few registers on target machine")
 
-        new_program = [Instruction('loadI', 1024, out1=BASE_REGISTER)]
+        new_program = [Instruction('loadI', 1024, out1=FEASIBLE_SET[0])]
         register_mappings = {}
-        spill_mappings = spillDict()
+        spill_mappings = SpillDict()
         used_registers = self.get_sorted_registers()
-        reg_number = FEASIBLE_SET_NUM + 1
-        for reg in used_registers[0:target_registers - FEASIBLE_SET_NUM]:
+        reg_number = len(FEASIBLE_SET) + 1
+        for reg in used_registers[0:target_registers - len(FEASIBLE_SET)]:
+            self.logger.debug('mapping %s to r%d' % (reg[0], reg_number))
             register_mappings[reg[0]] = 'r%d' % reg_number
             reg_number += 1
 
