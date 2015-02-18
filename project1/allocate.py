@@ -13,9 +13,9 @@ def main(target_registers, algo, file_name):
         print 'ERROR: invalid allocation algo "%s"' % algo
         sys.exit(1)
 
-    if target_registers < iloc.FEASIBLE_SET:
+    if target_registers < iloc.FEASIBLE_SET_NUM:
         print ('ERROR: to few registers on target architecture, need at lest'
-               ' %d' % FEASIBLE_SET)
+               ' %d' % iloc.FEASIBLE_SET_NUM)
 
     try:
         input_file = open(file_name)
@@ -24,10 +24,9 @@ def main(target_registers, algo, file_name):
         sys.exit(1)
 
     original_program = iloc.ILoc(input_file, target_registers)
-    print original_program
-    regs = original_program.get_sorted_registers()
-    for reg in regs:
-        print '%s: %d' % (reg[0], reg[1])
+    if algo == 's':
+        for instr in original_program.spill_no_live(target_registers):
+            print instr
 
 
 if __name__ == '__main__':
@@ -35,4 +34,4 @@ if __name__ == '__main__':
         print 'ERROR: Wrong number of arguments'
         sys.exit(1)
 
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(int(sys.argv[1]), sys.argv[2], sys.argv[3])
