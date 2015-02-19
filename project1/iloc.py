@@ -23,6 +23,7 @@ OPCODES = [
     'cmp_LT',
     'cmp_LE',
     'rshift',
+    'lshift',
     'output',
 ]
 
