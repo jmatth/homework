@@ -63,8 +63,8 @@ class ILoc(object):
             reverse=True
         )
 
-    def spill_no_live(self, target_registers):
-        if target_registers < len(FEASIBLE_SET):
+    def spill_no_live(self):
+        if self.target_registers < len(FEASIBLE_SET):
             raise Exception("Too few registers on target machine")
 
         new_program = ILoc(self.target_registers)
@@ -75,7 +75,7 @@ class ILoc(object):
         spill_mappings = SpillDict()
         used_registers = self.get_sorted_registers()
         reg_number = len(FEASIBLE_SET) + 1
-        for reg in used_registers[0:target_registers - len(FEASIBLE_SET)]:
+        for reg in used_registers[0:self.target_registers - len(FEASIBLE_SET)]:
             self.logger.debug('mapping %s to r%d' % (reg[0], reg_number))
             register_mappings[reg[0]] = 'r%d' % reg_number
             reg_number += 1
