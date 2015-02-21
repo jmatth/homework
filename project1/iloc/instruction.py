@@ -1,3 +1,9 @@
+from args import *
+
+
+FEASIBLE_SET = [PhysicalRegister('r%d' % i) for i in range(3)]
+
+
 OPCODES = [
     'loadI',
     'load',
@@ -22,15 +28,6 @@ OPCODES = [
 ]
 
 
-def is_register(ident):
-    try:
-        if re.match('^r[0-9]+$', ident):
-            return True
-    except:
-        pass
-    return False
-
-
 class Instruction(object):
 
     """Docstring for Instruction. """
@@ -45,10 +42,10 @@ class Instruction(object):
             raise Exception("No such opcode '%s'" % opcode)
         self.opcode = opcode
 
-        self.input1 = in1
-        self.input2 = in2
-        self.output1 = out1
-        self.output2 = out2
+        self.input1 = create_arg(in1)
+        self.input2 = create_arg(in2)
+        self.output1 = create_arg(out1)
+        self.output2 = create_arg(out2)
 
     def _new_from_line(self, line):
         opcode = None
@@ -77,9 +74,9 @@ class Instruction(object):
 
         if len(inputs) < 1:
             return
-        self.input1 = inputs[0].strip(',')
+        self.input1 = create_arg(inputs[0].strip(','))
         try:
-            self.input2 = inputs[1].lstrip(',')
+            self.input2 = create_arg(inputs[1].lstrip(','))
         except IndexError:
             pass
 
@@ -90,9 +87,9 @@ class Instruction(object):
         if len(outputs) < 1:
             return
 
-        self.output1 = outputs[0].strip(',')
+        self.output1 = create_arg(outputs[0].strip(','))
         try:
-            self.output2 = outputs[1].lstrip(',')
+            self.output2 = create_arg(outputs[1].lstrip(','))
         except IndexError:
             pass
 
@@ -116,7 +113,7 @@ class Instruction(object):
     def get_registers(self):
         regs = []
         for attr in self.get_args():
-            if is_register(attr):
+            if isinstance(attr, Register):
                 regs.append(attr)
 
         return regs
@@ -128,7 +125,7 @@ class Instruction(object):
         in1 = self.input1
         if in1 in rmaps:
             in1 = rmaps[in1]
-        elif is_register(in1):
+        elif isinstance(in1, Register):
             in1tmp = FEASIBLE_SET[1]
             pre_instructions += self.generate_load(mmaps[in1], in1tmp)
             in1 = in1tmp
@@ -136,7 +133,7 @@ class Instruction(object):
         in2 = self.input2
         if in2 in rmaps:
             in2 = rmaps[in2]
-        elif is_register(in2):
+        elif isinstance(in2, Register):
             in2tmp = FEASIBLE_SET[2]
             pre_instructions += self.generate_load(mmaps[in2], in2tmp)
             in2 = in2tmp
@@ -144,7 +141,7 @@ class Instruction(object):
         out1 = self.output1
         if out1 in rmaps:
             out1 = rmaps[out1]
-        elif is_register(out1) and not self.opcode.startswith('store'):
+        elif isinstance(out1, Register) and not self.opcode.startswith('store'):
             out1tmp = FEASIBLE_SET[2]
             post_instructions += self.generate_store(out1tmp, mmaps[out1])
             out1 = out1tmp

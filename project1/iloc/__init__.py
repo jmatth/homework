@@ -1,9 +1,8 @@
 import re
 import logging
 from collections import defaultdict
-from instruction import Instruction
-
-FEASIBLE_SET = ['r%d' % i for i in range(3)]
+from instruction import Instruction, FEASIBLE_SET
+from args import Address
 
 
 class SpillDict(defaultdict):
@@ -14,7 +13,7 @@ class SpillDict(defaultdict):
 
     def _newmap(self):
         self.mem_offset -= 4
-        return self.mem_offset
+        return Address(self.mem_offset)
 
 
 class ILoc(object):

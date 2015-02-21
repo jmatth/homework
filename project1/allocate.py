@@ -28,7 +28,7 @@ def main(target_registers, algo, file_name):
 
     original_program = iloc.ILoc(target_registers, input_file)
     if algo == 's':
-        print original_program.spill_no_live(target_registers)
+        print original_program.spill_no_live()
 
 
 if __name__ == '__main__':
