@@ -99,16 +99,17 @@ class ILoc(object):
         line_num = 0
         feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
+            new_program.add_instruction(Instruction(
+                '\n// %s' % instr.opcode,
+                instr.input1.value,
+                instr.input2.value,
+                instr.output1.value,
+                instr.output2.value,
+            ))
             pre_instructions = []
             post_instructions = []
             line_num += 1
             outputs = instr.get_outputs()
-
-            for inreg in instr.get_inputs():
-                if not inreg.is_register():
-                    continue
-                if inreg.spilled:
-                    pre_instructions += inreg.make_load(feasible_iter.next())
 
             # For each output...
             for outreg in outputs:
@@ -123,7 +124,9 @@ class ILoc(object):
                 # Otherwise, try to map it to an available register
                 for physreg in physical_registers:
                     if physreg.mapped_from is None:
+                        self.logger.debug('found empty physreg %s', physreg)
                         outreg.map_to(physreg)
+                        break
                 # If none are available, try to find the one that's used by the
                 # farthest away register
                 else:
@@ -134,7 +137,8 @@ class ILoc(object):
                         next_use = self.get_next_use(vreg, line_num)
                         if next_use is -1:
                             vreg.mapped_currently = False
-                            # FIXME: add spill instructions when it's evicted
+                            pre_instructions += \
+                                vreg.make_spill()
                             outreg.map_to(physreg)
                             break
                         elif next_use > farthest_away_line:
@@ -142,8 +146,19 @@ class ILoc(object):
                             farthest_away_line = next_use
                     else:
                         if farthest_away_reg is not None:
+                            self.logger.debug(
+                                'spilling %s for %s',
+                                farthest_away_reg,
+                                outreg
+                            )
                             pre_instructions += farthest_away_reg.make_spill()
                             outreg.map_to(physreg)
+
+            for inreg in instr.get_inputs():
+                if not inreg.is_register():
+                    continue
+                if inreg.spilled:
+                    pre_instructions += inreg.make_load(feasible_iter.next())
 
             new_program.append_instructions(pre_instructions)
             new_program.add_instruction(Instruction(

@@ -107,6 +107,7 @@ class VirtualRegister(Register):
         self.mapped_currently = True
 
     def make_spill(self):
+        self.logger.debug('Spilling %s to %s', self, self.spill_maps[self])
         self.mapped_currently = False
         self.spilled = True
         return [
@@ -155,6 +156,8 @@ OPCODES = [
     'output',
 ]
 
+OPCODES = OPCODES + ['\n// %s' % op for op in OPCODES]
+
 
 class Instruction(object):
 
@@ -197,8 +200,8 @@ class Instruction(object):
         self._process_outputs(tokens[delim + 1:])
 
     def _process_inputs(self, inputs):
-        self.input1 = None
-        self.input2 = None
+        self.input1 = create_arg(None)
+        self.input2 = create_arg(None)
 
         if len(inputs) < 1:
             return
@@ -209,8 +212,8 @@ class Instruction(object):
             pass
 
     def _process_outputs(self, outputs):
-        self.output1 = None
-        self.output2 = None
+        self.output1 = create_arg(None)
+        self.output2 = create_arg(None)
 
         if len(outputs) < 1:
             return
