@@ -19,6 +19,7 @@ def main(target_registers, algo, file_name):
     if target_registers < len(iloc.FEASIBLE_SET):
         print ('ERROR: to few registers on target architecture, need at lest'
                ' %d' % len(iloc.FEASIBLE_SET))
+        sys.exit(1)
 
     try:
         input_file = open(file_name)
@@ -29,6 +30,10 @@ def main(target_registers, algo, file_name):
     original_program = iloc.ILoc(target_registers, input_file)
     if algo == 's':
         print original_program.spill_no_live()
+    elif algo == 't':
+        print original_program.spill_no_live()
+    elif algo == 'b':
+        print original_program.spill_bottom_up()
 
 
 if __name__ == '__main__':
