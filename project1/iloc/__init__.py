@@ -6,6 +6,9 @@ from instruction import Instruction, Address, PhysicalRegister, \
                         VirtualRegister, SpillDict, FEASIBLE_SET
 
 
+BASE_ADDR = 1020
+
+
 class ILoc(object):
 
     """Docstring for ILoc. """
@@ -59,7 +62,7 @@ class ILoc(object):
 
         new_program = ILoc(self.target_registers)
         new_program.add_instruction(
-            Instruction('loadI', 1024, out1=FEASIBLE_SET[0])
+            Instruction('loadI', BASE_ADDR, out1=FEASIBLE_SET[0])
         )
         register_mappings = {}
         spill_mappings = SpillDict()
@@ -90,7 +93,7 @@ class ILoc(object):
 
         new_program = ILoc(self.target_registers)
         new_program.add_instruction(
-            Instruction('loadI', 1024, out1=FEASIBLE_SET[0])
+            Instruction('loadI', BASE_ADDR, out1=FEASIBLE_SET[0])
         )
         physical_registers = [PhysicalRegister('r%d' % i) for i in
                               range(len(FEASIBLE_SET),
@@ -183,7 +186,7 @@ class ILoc(object):
 
         new_program = ILoc(self.target_registers)
         new_program.add_instruction(
-            Instruction('loadI', 1024, out1=FEASIBLE_SET[0])
+            Instruction('loadI', BASE_ADDR, out1=FEASIBLE_SET[0])
         )
         physical_registers = [PhysicalRegister('r%d' % i) for i in
                               range(len(FEASIBLE_SET),
@@ -224,19 +227,31 @@ class ILoc(object):
                 register.spilled = True
             preg_iter = iter(physical_registers)
             for register in line_regs[line][-len(physical_registers):]:
+                if register.spilled or register in mapped_registers:
+                    continue
                 preg = preg_iter.next()
                 if line in preg.mapped_lines:
                     for mreg in mapped_registers:
+                        self.logger.debug(
+                            'checking if %s:%s and %s:%s overlap',
+                            mreg, mreg.live_range,
+                            register, register.live_range
+                        )
                         if mreg.mapped_to == preg and \
                                 (mreg.live_range[0] <= register.live_range[1]
                                  or
                                  mreg.live_range[1] >= register.live_range[0]):
+                            self.logger.debug('evicting %s from %s for %s',
+                                              mreg, preg, register)
                             mreg.spilled = True
                             mreg.mapped_to = None
                 register.map_to(preg)
+                mapped_registers.add(register)
+                self.logger.debug('%s has live range %s',
+                                  register, register.live_range)
                 for i in range(register.live_range[0],
                                register.live_range[1] + 1):
-                    preg.mapped_lines.add(line)
+                    preg.mapped_lines.add(i)
 
         feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
