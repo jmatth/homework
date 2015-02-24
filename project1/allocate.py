@@ -17,7 +17,7 @@ def main(target_registers, algo, file_name):
         sys.exit(1)
 
     if target_registers < len(iloc.FEASIBLE_SET):
-        print ('ERROR: to few registers on target architecture, need at lest'
+        print ('ERROR: to few registers on target architecture, need at least'
                ' %d' % len(iloc.FEASIBLE_SET))
         sys.exit(1)
 
@@ -31,7 +31,7 @@ def main(target_registers, algo, file_name):
     if algo == 's':
         print original_program.spill_no_live()
     elif algo == 't':
-        print original_program.spill_no_live()
+        print original_program.spill_live()
     elif algo == 'b':
         print original_program.spill_bottom_up()
 

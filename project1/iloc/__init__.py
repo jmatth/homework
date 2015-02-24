@@ -116,6 +116,9 @@ class ILoc(object):
                 # Skip if it isn't a register
                 if not outreg.is_register():
                     continue
+                # Did we already map it?
+                if outreg.mapped_to is not None:
+                    continue
                 # If it's a spilled register and the opcode is a store type,
                 # load it back into a feasible set register
                 elif outreg.spilled and instr.opcode.startswith('store'):
@@ -151,6 +154,7 @@ class ILoc(object):
                                 farthest_away_reg,
                                 outreg
                             )
+                            physreg = farthest_away_reg.mapped_to
                             pre_instructions += farthest_away_reg.make_spill()
                             outreg.map_to(physreg)
 
@@ -171,6 +175,9 @@ class ILoc(object):
             new_program.append_instructions(post_instructions)
 
         return new_program
+
+    def spill_live(self):
+        pass
 
     def get_next_use(self, reg, line_num):
         line = line_num - 1
