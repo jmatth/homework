@@ -177,7 +177,107 @@ class ILoc(object):
         return new_program
 
     def spill_live(self):
-        pass
+        # FIXME: fuck it, the other one works with k == F
+        if self.target_registers == len(FEASIBLE_SET):
+            return self.spill_no_live()
+
+        new_program = ILoc(self.target_registers)
+        new_program.add_instruction(
+            Instruction('loadI', 1024, out1=FEASIBLE_SET[0])
+        )
+        physical_registers = [PhysicalRegister('r%d' % i) for i in
+                              range(len(FEASIBLE_SET),
+                                    self.target_registers)]
+
+        # Calculate the live ranges
+        registers = set()
+        line_num = 0
+        for instr in self.program:
+            line_num += 1
+            for arg in instr.get_args():
+                if arg.is_register():
+                    arg.extend_live_range(line_num)
+                    registers.add(arg)
+
+        live_counts = defaultdict(lambda: 0)
+        line_regs = defaultdict(lambda: [])
+        for r in registers:
+            for line in range(r.live_range[0], r.live_range[1] + 1):
+                live_counts[line] += 1
+                line_regs[line].append(r)
+
+        reg_uses = self.get_register_count()
+        for line in line_regs:
+            line_regs[line] = sorted(line_regs[line],
+                                     key=lambda x: reg_uses[x])
+
+        sorted_lines = sorted(
+            [(a, b) for a, b in live_counts.iteritems()],
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        mapped_registers = set()
+        for line in [x[0] for x in sorted_lines]:
+            # These get spilled
+            for register in line_regs[line][:-(len(physical_registers))]:
+                register.spilled = True
+            preg_iter = iter(physical_registers)
+            for register in line_regs[line][-len(physical_registers):]:
+                preg = preg_iter.next()
+                if line in preg.mapped_lines:
+                    for mreg in mapped_registers:
+                        if mreg.mapped_to == preg and \
+                                (mreg.live_range[0] <= register.live_range[1]
+                                 or
+                                 mreg.live_range[1] >= register.live_range[0]):
+                            mreg.spilled = True
+                            mreg.mapped_to = None
+                register.map_to(preg)
+                for i in range(register.live_range[0],
+                               register.live_range[1] + 1):
+                    preg.mapped_lines.add(line)
+
+        feasible_iter = cycle(FEASIBLE_SET[1:])
+        for instr in self.program:
+            post_instructions = []
+            new_program.add_instruction(Instruction(
+                '\n// %s' % instr.opcode,
+                instr.input1.value,
+                instr.input2.value,
+                instr.output1.value,
+                instr.output2.value,
+            ))
+
+            for inarg in instr.get_inputs():
+                if inarg.is_register() and inarg.spilled:
+                    new_program.append_instructions(
+                        inarg.make_load(feasible_iter.next())
+                    )
+
+            if instr.opcode.startswith('store'):
+                for inarg in instr.get_inputs():
+                    if inarg.is_register() and inarg.spilled:
+                        new_program.append_instructions(
+                            inarg.make_load(feasible_iter.next())
+                        )
+
+            if not instr.opcode.startswith('store'):
+                for outarg in instr.get_outputs():
+                    if outarg.is_register() and outarg.spilled:
+                        outarg.mapped_to = FEASIBLE_SET[2]
+                        post_instructions += outarg.make_spill()
+
+            new_program.add_instruction(Instruction(
+                instr.opcode,
+                instr.input1,
+                instr.input2,
+                instr.output1,
+                instr.output2,
+            ))
+            new_program.append_instructions(post_instructions)
+
+        return new_program
 
     def get_next_use(self, reg, line_num):
         line = line_num - 1

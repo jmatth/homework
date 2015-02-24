@@ -84,6 +84,7 @@ class PhysicalRegister(Register):
     def __init__(self, value):
         Register.__init__(self, value)
         self.mapped_from = None
+        self.mapped_lines = set()
 
 FEASIBLE_SET = [PhysicalRegister('r%d' % i) for i in range(3)]
 
@@ -98,6 +99,7 @@ class VirtualRegister(Register):
         self.mapped_to = None
         self.mapped_currently = False
         self.spilled = False
+        self.live_range = (-1, -1)
         Register.__init__(self, value)
 
     def map_to(self, preg):
@@ -126,6 +128,12 @@ class VirtualRegister(Register):
                         out1=load_to),
             Instruction('load', load_to, out1=load_to)
         ]
+
+    def extend_live_range(self, line_num):
+        if self.live_range[0] < 0:
+            self.live_range = (line_num, line_num)
+        else:
+            self.live_range = (self.live_range[0], line_num - 1)
 
     def translate(self):
         if self.mapped_to is not None:
