@@ -14,7 +14,7 @@ digraph divisible_by_eight {
 
   s_0 -> s_1 [label="c"]
   s_1 -> s_2 [label="Ɛ"]
-  s_2 -> s_3 [label="r"]
+  s_2 -> s_3 [label="Ɛ"]
   s_2 -> s_4 [label="Ɛ"]
 
   s_4 -> s_5 [label="d"]
