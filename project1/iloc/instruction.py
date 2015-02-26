@@ -122,6 +122,7 @@ class VirtualRegister(Register):
         if not self.spilled:
             raise Exception('Trying to load non-spilled register %s?' %
                             self.value)
+        self.logger.debug('Loading %s from %s', self, self.spill_maps[self])
         self.mapped_to = load_to
         return [
             Instruction('addI', FEASIBLE_SET[0], self.spill_maps[self],

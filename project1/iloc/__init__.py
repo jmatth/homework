@@ -102,6 +102,7 @@ class ILoc(object):
         line_num = 0
         feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
+            self.logger.debug(instr)
             new_program.add_instruction(Instruction(
                 '\n// %s' % instr.opcode,
                 instr.input1.value,
@@ -120,7 +121,7 @@ class ILoc(object):
                 if not outreg.is_register():
                     continue
                 # Did we already map it?
-                if outreg.mapped_to is not None:
+                if outreg.mapped_currently:
                     continue
                 # If it's a spilled register and the opcode is a store type,
                 # load it back into a feasible set register
