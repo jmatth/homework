@@ -9,6 +9,8 @@ from instruction import Instruction, Address, PhysicalRegister, \
 
 BASE_ADDR = 1020
 
+ADD_INSTR_COMMENTS = False
+
 
 class ILoc(object):
 
@@ -156,13 +158,14 @@ class ILoc(object):
         # feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
             self.logger.debug(instr)
-            new_program.add_instruction(Instruction(
-                '\n// %s' % instr.opcode,
-                instr.input1.value,
-                instr.input2.value,
-                instr.output1.value,
-                instr.output2.value,
-            ))
+            if ADD_INSTR_COMMENTS:
+                new_program.add_instruction(Instruction(
+                    '\n// %s' % instr.opcode,
+                    instr.input1.value,
+                    instr.input2.value,
+                    instr.output1.value,
+                    instr.output2.value,
+                ))
             pre_instructions = []
             post_instructions = []
             line_num += 1
@@ -282,13 +285,14 @@ class ILoc(object):
         feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
             post_instructions = []
-            new_program.add_instruction(Instruction(
-                '\n// %s' % instr.opcode,
-                instr.input1.value,
-                instr.input2.value,
-                instr.output1.value,
-                instr.output2.value,
-            ))
+            if ADD_INSTR_COMMENTS:
+                new_program.add_instruction(Instruction(
+                    '\n// %s' % instr.opcode,
+                    instr.input1.value,
+                    instr.input2.value,
+                    instr.output1.value,
+                    instr.output2.value,
+                ))
 
             for inarg in instr.get_inputs():
                 if inarg.is_register() and inarg.spilled:
