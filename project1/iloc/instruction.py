@@ -108,7 +108,7 @@ class VirtualRegister(Register):
         preg.mapped_from = self
         self.mapped_currently = True
 
-    def make_spill(self, bu = False):
+    def make_spill(self, bu=False):
         self.mapped_currently = False
         # special case because bottom up and top-down expect different behavior
         if bu:

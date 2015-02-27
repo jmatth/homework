@@ -320,7 +320,7 @@ class ILoc(object):
         if farthest_away is None:
             raise Exception('No allocatable register found?')
         physreg = farthest_away.mapped_to
-        pre_instructions += farthest_away.make_spill()
+        pre_instructions += farthest_away.make_spill(True)
         return physreg
 
     def find_farthest(self, line_num):
