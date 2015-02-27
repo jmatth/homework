@@ -100,10 +100,26 @@ class ILoc(object):
                               range(len(FEASIBLE_SET),
                                     self.target_registers)]
 
+        def ensure(register, pre_instructions):
+            # is it already loaded?
+            if inreg.mapped_currently:
+                return
+
+            # is there a free register?
+            for physreg in physical_registers:
+                if physreg.mapped_from is None:
+                    pre_instructions += register.make_load(physreg)
+                    register.mapped_currently = True
+                    return
+
+            physreg = self.allocate(physical_registers, line_num,
+                                    pre_instructions)
+            pre_instructions += register.make_load(physreg)
+            register.mapped_currently = True
+
         line_num = 0
         # feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
-            # pdb.set_trace()
             self.logger.debug(instr)
             new_program.add_instruction(Instruction(
                 '\n// %s' % instr.opcode,
@@ -116,102 +132,41 @@ class ILoc(object):
             post_instructions = []
             line_num += 1
 
-            check_loaded = instr.get_inputs() + instr.get_outputs()
-            reset_spilled = []
+            inputs = [i for i in instr.get_inputs() if i.is_register()]
+            outputs = []
 
-            # For each output...
-            for outreg in check_loaded:
-                # Skip if it isn't a register
-                if not outreg.is_register():
-                    continue
-                # Did we already map it?
-                if outreg.mapped_to is not None:
-                    self.logger.debug('%s already loaded in %s, skipping',
-                                      outreg, outreg.mapped_to)
-                    continue
-                # If it's a spilled register and the opcode is a store type,
-                # load it back into a feasible set register
-                # elif outreg.spilled and instr.opcode.startswith('store'):
-                #     pre_instructions += outreg.make_load(feasible_iter.next())
-                #     continue
-                # Otherwise, try to map it to an available register
+            if instr.opcode.startswith('store'):
+                inputs += [i for i in instr.get_outputs()
+                           if i.is_register()]
+            else:
+                outputs = [i for i in instr.get_outputs()
+                           if i.is_register()]
+
+            for inreg in inputs:
+                ensure(inreg, pre_instructions)
+
+            for inreg in inputs:
+                if self.get_next_use(inreg, line_num) < 0:
+                    self.logger.debug('input %s not used again, freeing',
+                                      inreg)
+                    inreg.mapped_to.mapped_from = None
+
+            for outreg in outputs:
                 for physreg in physical_registers:
                     if physreg.mapped_from is None:
-                        self.logger.debug('found empty physreg %s', physreg)
                         outreg.map_to(physreg)
                         break
-                # If none are available, try to find the one that's used by the
-                # farthest away register
                 else:
-                    farthest_away_reg = None
-                    farthest_away_line = 0
-                    for physreg in physical_registers:
-                        vreg = physreg.mapped_from
-                        # don't spill one input for another
-                        if outreg in instr.get_inputs():
-                            if vreg in instr.get_inputs():
-                                continue
-                            if instr.opcode.startswith('store') and \
-                                    vreg in instr.get_outputs():
-                                continue
-                        next_use = self.get_next_use(vreg, line_num)
-                        # never used again
-                        if next_use is -1:
-                            vreg.mapped_currently = False
-                            # pre_instructions += \
-                            #     vreg.make_spill()
-                            self.logger.debug('no next use for %s, discarding',
-                                              vreg)
-                            # pdb.set_trace()
-                            if outreg in instr.get_inputs() or \
-                                    instr.opcode.startswith('store'):
-                                self.logger.debug(
-                                    'still loading %s for input', vreg
-                                )
-                                pre_instructions += outreg.make_load(physreg)
-                            else:
-                                outreg.map_to(physreg)
-                            physreg.mapped_from = outreg
-                            break
-                        elif next_use > farthest_away_line:
-                            farthest_away_reg = vreg
-                            farthest_away_line = next_use
-                    else:
-                        if farthest_away_reg is not None:
-                            self.logger.debug(
-                                'spilling %s for %s',
-                                farthest_away_reg,
-                                outreg
-                            )
-                            physreg = farthest_away_reg.mapped_to
-                            pre_instructions += farthest_away_reg.make_spill()
-                            reset_spilled.append(farthest_away_reg)
-                            if outreg in instr.get_inputs() or \
-                                    instr.opcode.startswith('store'):
-                                self.logger.debug('loading existing data %s',
-                                                  outreg)
-                                pre_instructions += outreg.make_load(physreg)
-                                physreg.mapped_from = outreg
-                                outreg.mapped_currently = True
-                            else:
-                                self.logger.debug('found new data %s', outreg)
-                                outreg.map_to(physreg)
-
+                    physreg = self.allocate(physical_registers, line_num + 1,
+                                            pre_instructions)
+                    outreg.map_to(physreg)
 
             new_program.append_instructions(pre_instructions)
             new_program.add_instruction(Instruction(
                 instr.opcode,
-                instr.input1,
-                instr.input2,
-                instr.output1,
-                instr.output2
+                *(instr.get_args())
             ))
             new_program.append_instructions(post_instructions)
-
-            for reg in reset_spilled:
-                if not reg.mapped_currently:
-                    self.logger.debug('clearning mapped_to on %s', reg)
-                    reg.mapped_to = None
 
         return new_program
 
@@ -338,6 +293,44 @@ class ILoc(object):
                 if reg == ireg:
                     return line
         return -1
+
+    def allocate(self, physical_registers, line_num, pre_instructions):
+        reglist = []
+        for instr in self.program[line_num - 1:]:
+            reglist += instr.get_registers()
+
+        farthest_away = None
+        farthest_index = -1
+
+        for physreg in physical_registers:
+            if physreg.mapped_from is None:
+                return physreg
+
+            try:
+                new_index = reglist.index(physreg.mapped_from)
+            except ValueError:
+                self.logger.debug('%s never used again, freeing',
+                                  physreg.mapped_from)
+                return physreg
+            if new_index > farthest_index:
+                farthest_index = new_index
+                farthest_away = physreg.mapped_from
+
+        if farthest_away is None:
+            raise Exception('No allocatable register found?')
+        physreg = farthest_away.mapped_to
+        pre_instructions += farthest_away.make_spill()
+        return physreg
+
+    def find_farthest(self, line_num):
+        seen = set()
+        farthest = None
+        for instr in self.program[line_num - 1:]:
+            for reg in instr.get_registers():
+                if reg.mapped_currently and reg not in seen:
+                    seen.add(reg)
+                    farthest = reg
+        return farthest
 
     def __str__(self):
         out = ''

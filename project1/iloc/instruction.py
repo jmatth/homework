@@ -108,9 +108,15 @@ class VirtualRegister(Register):
         preg.mapped_from = self
         self.mapped_currently = True
 
-    def make_spill(self):
-        self.logger.debug('Spilling %s to %s', self, self.spill_maps[self])
+    def make_spill(self, bu = False):
         self.mapped_currently = False
+        # special case because bottom up and top-down expect different behavior
+        if bu:
+            # if already spilled
+            if self.spilled:
+                return []
+
+        self.logger.debug('Spilling %s to %s', self, self.spill_maps[self])
         self.spilled = True
         return [
             Instruction('addI', FEASIBLE_SET[0], self.spill_maps[self],
@@ -124,6 +130,7 @@ class VirtualRegister(Register):
                             self.value)
         self.logger.debug('Loading %s from %s', self, self.spill_maps[self])
         self.mapped_to = load_to
+        load_to.mapped_from = self
         return [
             Instruction('addI', FEASIBLE_SET[0], self.spill_maps[self],
                         out1=load_to),
