@@ -59,6 +59,40 @@ class ILoc(object):
             reverse=True
         )
 
+    def register_to_register(self):
+        new_program = ILoc(self.target_registers)
+        new_program.add_instruction(
+            Instruction('loadI', BASE_ADDR, out1=FEASIBLE_SET[0])
+        )
+
+        physical_registers = FEASIBLE_SET[-2:] + \
+            [PhysicalRegister('r%d' % i) for i in
+             range(len(FEASIBLE_SET),
+             self.target_registers)]
+
+        vregisters = sorted(
+            [reg for reg in self.get_register_count()],
+            key=lambda x: int(x.value[1:]),
+        )
+
+        self.logger.debug('vregs: %s', vregisters)
+        self.logger.debug('pregs: %s', physical_registers)
+
+        for i in range(len(vregisters)):
+            vregisters[i].map_to(physical_registers[i])
+
+        for instr in self.program:
+            new_program.add_instruction(Instruction(
+                instr.opcode,
+                instr.input1,
+                instr.input2,
+                instr.output1,
+                instr.output2,
+            ))
+
+        return new_program
+
+
     def spill_no_live(self):
 
         new_program = ILoc(self.target_registers)
@@ -88,7 +122,7 @@ class ILoc(object):
         if self.target_registers < len(FEASIBLE_SET):
             raise Exception("Too few registers on target machine")
 
-        # FIXME: fuck it, the other one works with k == F
+        # fuck it, the other one works with k == F
         if self.target_registers == len(FEASIBLE_SET):
             return self.spill_no_live()
 
@@ -172,7 +206,7 @@ class ILoc(object):
         return new_program
 
     def spill_live(self):
-        # FIXME: fuck it, the other one works with k == F
+        # fuck it, the other one works with k == F
         if self.target_registers == len(FEASIBLE_SET):
             return self.spill_no_live()
 

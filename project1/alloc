@@ -28,7 +28,11 @@ def main(target_registers, algo, file_name):
         sys.exit(1)
 
     original_program = iloc.ILoc(target_registers, input_file)
-    if algo == 's':
+    if len(original_program.get_register_count()) <= \
+            target_registers - (len(iloc.FEASIBLE_SET) - 2):
+        logger.debug('Enough registers, doing register -> register')
+        print original_program.register_to_register()
+    elif algo == 's':
         print original_program.spill_no_live()
     elif algo == 't':
         print original_program.spill_live()
