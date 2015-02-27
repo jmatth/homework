@@ -272,7 +272,7 @@ class ILoc(object):
                     )
 
             if instr.opcode.startswith('store'):
-                for inarg in instr.get_inputs():
+                for inarg in instr.get_outputs():
                     if inarg.is_register() and inarg.spilled:
                         new_program.append_instructions(
                             inarg.make_load(feasible_iter.next())
