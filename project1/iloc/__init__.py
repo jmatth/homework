@@ -96,9 +96,10 @@ class ILoc(object):
         new_program.add_instruction(
             Instruction('loadI', BASE_ADDR, out1=FEASIBLE_SET[0])
         )
-        physical_registers = [PhysicalRegister('r%d' % i) for i in
-                              range(len(FEASIBLE_SET),
-                                    self.target_registers)]
+        physical_registers = FEASIBLE_SET[-1:] + \
+            [PhysicalRegister('r%d' % i) for i in
+             range(len(FEASIBLE_SET),
+             self.target_registers)]
 
         def ensure(register, pre_instructions):
             # is it already loaded?
