@@ -11,7 +11,7 @@ VALID_ALGOS = ['b', 't', 's']
 def main(target_registers, algo, file_name):
     logging.basicConfig()
     logger = logging.getLogger('allocator')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     if algo not in VALID_ALGOS:
         print 'ERROR: invalid allocation algo "%s"' % algo
         sys.exit(1)
