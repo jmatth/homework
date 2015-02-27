@@ -9,4 +9,6 @@ All the allocator logic lives in the iloc module. Inside this module are two fil
 The executable file alloc is a driver that processes user input, checks it for
 any errors, and invokes the specified algorithm from the iloc module. It takes
 command-line arguments as specified in the project description. Since python is
-an interpreted language, no compilation is necessary.
+an interpreted language, no compilation is necessary. However, the alloc program
+does rely on the code inside the iloc module, so moving it to a new location
+without also moving the directory "iloc" will cause it to fail.
