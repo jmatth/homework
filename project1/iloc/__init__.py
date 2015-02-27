@@ -1,4 +1,5 @@
 import re
+import pdb
 import logging
 from itertools import cycle
 from collections import defaultdict
@@ -100,8 +101,9 @@ class ILoc(object):
                                     self.target_registers)]
 
         line_num = 0
-        feasible_iter = cycle(FEASIBLE_SET[1:])
+        # feasible_iter = cycle(FEASIBLE_SET[1:])
         for instr in self.program:
+            # pdb.set_trace()
             self.logger.debug(instr)
             new_program.add_instruction(Instruction(
                 '\n// %s' % instr.opcode,
@@ -113,21 +115,25 @@ class ILoc(object):
             pre_instructions = []
             post_instructions = []
             line_num += 1
-            outputs = instr.get_outputs()
+
+            check_loaded = instr.get_inputs() + instr.get_outputs()
+            reset_spilled = []
 
             # For each output...
-            for outreg in outputs:
+            for outreg in check_loaded:
                 # Skip if it isn't a register
                 if not outreg.is_register():
                     continue
                 # Did we already map it?
-                if outreg.mapped_currently:
+                if outreg.mapped_to is not None:
+                    self.logger.debug('%s already loaded in %s, skipping',
+                                      outreg, outreg.mapped_to)
                     continue
                 # If it's a spilled register and the opcode is a store type,
                 # load it back into a feasible set register
-                elif outreg.spilled and instr.opcode.startswith('store'):
-                    pre_instructions += outreg.make_load(feasible_iter.next())
-                    continue
+                # elif outreg.spilled and instr.opcode.startswith('store'):
+                #     pre_instructions += outreg.make_load(feasible_iter.next())
+                #     continue
                 # Otherwise, try to map it to an available register
                 for physreg in physical_registers:
                     if physreg.mapped_from is None:
@@ -141,12 +147,31 @@ class ILoc(object):
                     farthest_away_line = 0
                     for physreg in physical_registers:
                         vreg = physreg.mapped_from
+                        # don't spill one input for another
+                        if outreg in instr.get_inputs():
+                            if vreg in instr.get_inputs():
+                                continue
+                            if instr.opcode.startswith('store') and \
+                                    vreg in instr.get_outputs():
+                                continue
                         next_use = self.get_next_use(vreg, line_num)
+                        # never used again
                         if next_use is -1:
                             vreg.mapped_currently = False
-                            pre_instructions += \
-                                vreg.make_spill()
-                            outreg.map_to(physreg)
+                            # pre_instructions += \
+                            #     vreg.make_spill()
+                            self.logger.debug('no next use for %s, discarding',
+                                              vreg)
+                            # pdb.set_trace()
+                            if outreg in instr.get_inputs() or \
+                                    instr.opcode.startswith('store'):
+                                self.logger.debug(
+                                    'still loading %s for input', vreg
+                                )
+                                pre_instructions += outreg.make_load(physreg)
+                            else:
+                                outreg.map_to(physreg)
+                            physreg.mapped_from = outreg
                             break
                         elif next_use > farthest_away_line:
                             farthest_away_reg = vreg
@@ -160,13 +185,18 @@ class ILoc(object):
                             )
                             physreg = farthest_away_reg.mapped_to
                             pre_instructions += farthest_away_reg.make_spill()
-                            outreg.map_to(physreg)
+                            reset_spilled.append(farthest_away_reg)
+                            if outreg in instr.get_inputs() or \
+                                    instr.opcode.startswith('store'):
+                                self.logger.debug('loading existing data %s',
+                                                  outreg)
+                                pre_instructions += outreg.make_load(physreg)
+                                physreg.mapped_from = outreg
+                                outreg.mapped_currently = True
+                            else:
+                                self.logger.debug('found new data %s', outreg)
+                                outreg.map_to(physreg)
 
-            for inreg in instr.get_inputs():
-                if not inreg.is_register():
-                    continue
-                if inreg.spilled:
-                    pre_instructions += inreg.make_load(feasible_iter.next())
 
             new_program.append_instructions(pre_instructions)
             new_program.add_instruction(Instruction(
@@ -177,6 +207,11 @@ class ILoc(object):
                 instr.output2
             ))
             new_program.append_instructions(post_instructions)
+
+            for reg in reset_spilled:
+                if not reg.mapped_currently:
+                    self.logger.debug('clearning mapped_to on %s', reg)
+                    reg.mapped_to = None
 
         return new_program
 
@@ -296,8 +331,8 @@ class ILoc(object):
         return new_program
 
     def get_next_use(self, reg, line_num):
-        line = line_num - 1
-        for instr in self.program[line_num + 1:]:
+        line = line_num
+        for instr in self.program[line_num:]:
             line += 1
             for ireg in instr.get_registers():
                 if reg == ireg:
