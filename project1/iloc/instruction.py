@@ -185,8 +185,8 @@ class Instruction(object):
             self._new_from_line(line)
             return
 
-        if opcode not in OPCODES:
-            raise Exception("No such opcode '%s'" % opcode)
+        # if opcode not in OPCODES:
+        #     raise Exception("No such opcode '%s'" % opcode)
         self.opcode = opcode
 
         self.input1 = create_arg(in1)
@@ -203,8 +203,8 @@ class Instruction(object):
 
         tokens = line.split()
         opcode = tokens.pop(0)
-        if opcode not in OPCODES:
-            raise Exception("No such opcode '%s'" % opcode)
+        # if opcode not in OPCODES:
+        #     raise Exception("No such opcode '%s'" % opcode)
         self.opcode = opcode
 
         try:
