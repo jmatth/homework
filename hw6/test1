@@ -1,0 +1,10 @@
+program TEST1;
+  begin
+    C := 1;
+    B := 2;
+    A := B + C;
+    print (A);
+    C := A * 3;
+    Always := (never + B) * C;
+    print (B)
+  end.

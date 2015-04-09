@@ -1,0 +1,10 @@
+program TEST0;
+  begin
+    C := 1;
+    B := 2;
+    A := B + C;
+    print (A);
+    D := A * 3;
+    B := (B + B) * D - C;
+    print (B)
+  end.
