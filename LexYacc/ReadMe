@@ -1,0 +1,4 @@
+Call the parser on the example program "test0" by saying on the command line:
+
+> ./parser < test0
+

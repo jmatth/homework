@@ -1,0 +1,8 @@
+program Demo;
+  begin
+    B := 2;
+    A := B + C;
+    D := A * 3;
+    B := B * B * B + C
+  end.
+
