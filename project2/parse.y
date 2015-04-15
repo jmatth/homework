@@ -6,6 +6,7 @@ int yylex();
 void yyerror(char * s);
 #include "symtab.h"
 #include "dequeue.h"
+#include "errors.h"
 #include <string.h>
 
 FILE *outfile;
@@ -32,6 +33,7 @@ char *CommentBuffer;
 %type <token> idlist
 %type <token> type
 %type <token> stype
+%type <targetReg> ctrlexp
 
 %start program
 
@@ -132,13 +134,16 @@ writestmt : PRINT '(' exp ')' {
           ;
 
 fstmt : FOR ctrlexp DO
-      stmt {  }
-          ENDFOR
+        stmt {
+          emit(NOLABEL, BR, $2.controlLabel, EMPTY, EMPTY);
+          emit($2.endLabel, NOP, EMPTY, EMPTY, EMPTY);
+        }
+        ENDFOR
   ;
 
 wstmt : WHILE  {  }
-      condexp {  }
-          DO stmt  {  }
+        condexp {  }
+        DO stmt  {  }
           ENDWHILE
   ;
 
@@ -158,7 +163,7 @@ astmt : lhs ASG exp {
       }
       ;
 
-lhs : ID { /* BOGUS  - needs to be fixed */
+lhs : ID {
       SymTabEntry *var;
       char *commentString = malloc(sizeof(char) * 512);
       int newReg1 = NextRegister();
@@ -167,7 +172,7 @@ lhs : ID { /* BOGUS  - needs to be fixed */
       $$.targetRegister = newReg2;
 
       if ( (var = lookup($1.str)) == NULL) {
-        printf("*** ERROR ***: Variable %s used but not defined.\n", $1.str);
+        printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
         return;
       }
 
@@ -314,7 +319,35 @@ exp : exp '+' exp {
     ;
 
 
-ctrlexp : ID ASG ICONST ',' ICONST {   }
+ctrlexp : ID ASG ICONST ',' ICONST {
+          SymTabEntry *var;
+          int tmpReg = NextRegister();
+          int newReg = NextRegister();
+          int testReg = NextRegister();
+          int controlLabel = NextLabel();
+          int bodyLabel = NextLabel();
+          int endLabel = NextLabel();
+
+          if( (var = lookup($1.str)) == NULL) {
+            printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
+            return;
+          }
+
+          $$.controlLabel = controlLabel;
+          $$.endLabel = endLabel;
+
+          //Initialize the LCV
+          emit(NOLABEL, LOADI, $3.num - 1, tmpReg, EMPTY);
+          emit(NOLABEL, STOREAI, tmpReg, 0, var->offset);
+          //Retrieve the LCV and test if the loop is over
+          emit(controlLabel, LOADAI, 0, var->offset, newReg);
+          emit(NOLABEL, ADDI, newReg, 1, newReg);
+          emit(NOLABEL, STOREAI, newReg, 0, var->offset);
+          emit(NOLABEL, LOADI, $5.num, testReg, EMPTY);
+          emit(NOLABEL, CMPLE, newReg, testReg, testReg);
+          emit(NOLABEL, CBR, testReg, bodyLabel, endLabel);
+          emit(bodyLabel, NOP, EMPTY, EMPTY, EMPTY);
+        }
         ;
 
 

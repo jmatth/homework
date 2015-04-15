@@ -24,6 +24,8 @@ typedef enum type_expression {
 typedef struct {
     Type_Expression type;
     int targetRegister;
+    int endLabel;
+    int controlLabel;
 } regInfo;
 
 #endif
