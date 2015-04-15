@@ -261,21 +261,25 @@ exp : exp '+' exp {
 
 
 
-    | ICONST                 { int newReg = NextRegister();
-                             $$.targetRegister = newReg;
-           $$.type = TYPE_INT;
-           emit(NOLABEL, LOADI, $1.num, newReg, EMPTY); }
+    | ICONST {
+      int newReg = NextRegister();
+      $$.targetRegister = newReg;
+      $$.type = TYPE_INT;
+      emit(NOLABEL, LOADI, $1.num, newReg, EMPTY);
+    }
 
-    | TRUE                   { int newReg = NextRegister(); /* TRUE is encoded as value '1' */
-                             $$.targetRegister = newReg;
-           $$.type = TYPE_BOOL;
-           emit(NOLABEL, LOADI, 1, newReg, EMPTY); }
-
-    | FALSE                   { int newReg = NextRegister(); /* TRUE is encoded as value '0' */
-                             $$.targetRegister = newReg;
-           $$.type = TYPE_BOOL;
-           emit(NOLABEL, LOADI, 0, newReg, EMPTY); }
-
+    | TRUE {
+      int newReg = NextRegister(); /* TRUE is encoded as value '1' */
+      $$.targetRegister = newReg;
+      $$.type = TYPE_BOOL;
+      emit(NOLABEL, LOADI, 1, newReg, EMPTY);
+    }
+    | FALSE {
+      int newReg = NextRegister(); /* TRUE is encoded as value '0' */
+      $$.targetRegister = newReg;
+      $$.type = TYPE_BOOL;
+      emit(NOLABEL, LOADI, 0, newReg, EMPTY);
+    }
     | error { yyerror("***Error: illegal expression\n");}
     ;
 
@@ -286,17 +290,17 @@ ctrlexp : ID ASG ICONST ',' ICONST {   }
 
 condexp : exp NEQ exp  {  }
 
-| exp EQ exp  {  }
+        | exp EQ exp  {  }
 
-| exp LT exp  {  }
+        | exp LT exp  {  }
 
-| exp LEQ exp  {  }
+        | exp LEQ exp  {  }
 
-| exp GT exp  {  }
+        | exp GT exp  {  }
 
-| exp GEQ exp  {  }
+        | exp GEQ exp  {  }
 
-| error { yyerror("***Error: illegal conditional expression\n");}
+        | error { yyerror("***Error: illegal conditional expression\n");}
         ;
 
 %%
