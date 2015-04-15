@@ -13,10 +13,10 @@
 #define MAX_VIRTUAL_REGISTERS 2048
 
 typedef enum opcode_name {NOP=0, ADDI, ADD, SUBI, SUB, MULT,
-	                  LOADI, LOAD, LOADAI, LOADAO,
-                          STORE, STOREAI, STOREAO,
-			  BR, CBR, CMPLT, CMPLE, CMPEQ, CMPNE, CMPGE, CMPGT,
-			  OUTPUT, AND_INSTR, OR_INSTR} Opcode_Name;
+    LOADI, LOAD, LOADAI, LOADAO,
+    STORE, STOREAI, STOREAO,
+    BR, CBR, CMPLT, CMPLE, CMPEQ, CMPNE, CMPGE, CMPGT,
+    OUTPUT, AND_INSTR, OR_INSTR} Opcode_Name;
 extern
 FILE *outfile;
 

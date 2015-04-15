@@ -34,6 +34,9 @@ char *CommentBuffer;
 %type <token> type
 %type <token> stype
 %type <targetReg> ctrlexp
+%type <targetReg> condexp
+%type <targetReg> ifhead
+%type <targetReg> ifstmt
 
 %start program
 
@@ -111,14 +114,32 @@ stmt    : ifstmt { }
 cmpdstmt: BEG stmtlist END { }
         ;
 
-ifstmt :  ifhead
-       THEN stmt
-      ELSE
-          stmt
-          FI
+ifstmt : ifhead
+         THEN {
+            emit($1.controlLabel, NOP, EMPTY, EMPTY, EMPTY);
+            // Warning: HaX
+            $1.controlLabel = NextLabel();
+         }
+         stmt
+         ELSE {
+            emit(NOLABEL, BR, $1.controlLabel, EMPTY, EMPTY);
+            emit($1.endLabel, NOP, EMPTY, EMPTY, EMPTY);
+         }
+         stmt {
+            emit($1.controlLabel, NOP, EMPTY, EMPTY, EMPTY);
+         }
+         FI
   ;
 
-ifhead : IF condexp {  }
+ifhead : IF condexp {
+          int ifLabel = NextLabel();
+          int elseLabel = NextLabel();
+
+          $$.controlLabel = ifLabel;
+          $$.endLabel = elseLabel;
+
+          emit(NOLABEL, CBR, $2.targetRegister, ifLabel, elseLabel);
+       }
        ;
 
 writestmt : PRINT '(' exp ')' {
@@ -126,10 +147,10 @@ writestmt : PRINT '(' exp ')' {
             emitComment("Code for \"PRINT\"");
             emit(NOLABEL, STOREAI, $3.targetRegister, 0, newOffset);
             emit(NOLABEL,
-                  OUTPUT,
-                  STATIC_AREA_ADDRESS + newOffset,
-                  EMPTY,
-                  EMPTY);
+                 OUTPUT,
+                 STATIC_AREA_ADDRESS + newOffset,
+                 EMPTY,
+                 EMPTY);
           }
           ;
 
@@ -144,7 +165,7 @@ fstmt : FOR ctrlexp DO
 wstmt : WHILE  {  }
         condexp {  }
         DO stmt  {  }
-          ENDWHILE
+        ENDWHILE
   ;
 
 
@@ -351,18 +372,36 @@ ctrlexp : ID ASG ICONST ',' ICONST {
         ;
 
 
-condexp : exp NEQ exp  {  }
-
-        | exp EQ exp  {  }
-
-        | exp LT exp  {  }
-
-        | exp LEQ exp  {  }
-
-        | exp GT exp  {  }
-
-        | exp GEQ exp  {  }
-
+condexp : exp NEQ exp {
+          int newReg = NextRegister();
+          $$.targetRegister = newReg;
+          emit(NOLABEL, CMPNE, $1.targetRegister, $3.targetRegister, newReg);
+        }
+        | exp EQ exp {
+          int newReg = NextRegister();
+          $$.targetRegister = newReg;
+          emit(NOLABEL, CMPEQ, $1.targetRegister, $3.targetRegister, newReg);
+        }
+        | exp LT exp {
+          int newReg = NextRegister();
+          $$.targetRegister = newReg;
+          emit(NOLABEL, CMPLT, $1.targetRegister, $3.targetRegister, newReg);
+        }
+        | exp LEQ exp {
+          int newReg = NextRegister();
+          $$.targetRegister = newReg;
+          emit(NOLABEL, CMPLE, $1.targetRegister, $3.targetRegister, newReg);
+        }
+        | exp GT exp {
+          int newReg = NextRegister();
+          $$.targetRegister = newReg;
+          emit(NOLABEL, CMPGT, $1.targetRegister, $3.targetRegister, newReg);
+        }
+        | exp GEQ exp {
+          int newReg = NextRegister();
+          $$.targetRegister = newReg;
+          emit(NOLABEL, CMPGE, $1.targetRegister, $3.targetRegister, newReg);
+        }
         | error { yyerror("***Error: illegal conditional expression\n");}
         ;
 
