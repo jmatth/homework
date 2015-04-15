@@ -20,7 +20,7 @@
 typedef struct { /* need to augment this */
   char *name;
   int offset;
-  Type_Expression type;  
+  Type_Expression type;
 } SymTabEntry;
 
 extern

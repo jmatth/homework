@@ -7,16 +7,23 @@
 #ifndef ATTR_H
 #define ATTR_H
 
-typedef union {int num; char *str;} tokentype;
+#include "dequeue.h"
 
-typedef enum type_expression {TYPE_INT=0, TYPE_BOOL, TYPE_ERROR} Type_Expression;
+typedef union {
+    int num;
+    char *str;
+    struct Dequeue dequeue;
+} tokentype;
+
+typedef enum type_expression {
+    TYPE_INT=0,
+    TYPE_BOOL,
+    TYPE_ERROR
+} Type_Expression;
 
 typedef struct {
-        Type_Expression type;
-        int targetRegister;
-        } regInfo;
+    Type_Expression type;
+    int targetRegister;
+} regInfo;
 
 #endif
-
-
-  

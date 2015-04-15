@@ -12,12 +12,12 @@
 #define STATIC_AREA_ADDRESS 1024
 #define MAX_VIRTUAL_REGISTERS 2048
 
-typedef enum opcode_name {NOP=0, ADDI, ADD, SUBI, SUB, MULT, 
-	                  LOADI, LOAD, LOADAI, LOADAO, 
-                          STORE, STOREAI, STOREAO, 
+typedef enum opcode_name {NOP=0, ADDI, ADD, SUBI, SUB, MULT,
+	                  LOADI, LOAD, LOADAI, LOADAO,
+                          STORE, STOREAI, STOREAO,
 			  BR, CBR, CMPLT, CMPLE, CMPEQ, CMPNE, CMPGE, CMPGT,
 			  OUTPUT, AND_INSTR, OR_INSTR} Opcode_Name;
-extern 
+extern
 FILE *outfile;
 
 extern
@@ -32,16 +32,12 @@ int NextOffset(int units); /* units of 4 bytes */
 extern
 void emitComment(char *comment);
 
-extern 
-void emit(int label_index, 
-	  Opcode_Name opcode, 
-	  int field1, 
-	  int field2, 
+extern
+void emit(int label_index,
+	  Opcode_Name opcode,
+	  int field1,
+	  int field2,
 	  int field3);
 
 
 #endif /* _INSTRUCTION_H_ */
-
-
-
-
