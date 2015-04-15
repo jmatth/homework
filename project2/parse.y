@@ -232,10 +232,38 @@ exp : exp '+' exp {
       );
     }
 
-    | exp AND exp  {  }
+    | exp AND exp {
+      int newReg = NextRegister();
 
+      if (! (($1.type == TYPE_BOOL) && ($3.type == TYPE_BOOL))) {
+        printf("*** ERROR ***: Operator types must be boolean.\n");
+      }
 
-    | exp OR exp        {  }
+      $$.type = $1.type;
+      $$.targetRegister = newReg;
+      emit(NOLABEL,
+           AND_INSTR,
+           $1.targetRegister,
+           $3.targetRegister,
+           newReg
+      );
+    }
+    | exp OR exp {
+      int newReg = NextRegister();
+
+      if (! (($1.type == TYPE_BOOL) && ($3.type == TYPE_BOOL))) {
+        printf("*** ERROR ***: Operator types must be boolean.\n");
+      }
+
+      $$.type = $1.type;
+      $$.targetRegister = newReg;
+      emit(NOLABEL,
+           OR_INSTR,
+           $1.targetRegister,
+           $3.targetRegister,
+           newReg
+      );
+    }
 
 
     | ID {
@@ -243,11 +271,13 @@ exp : exp '+' exp {
         int newReg = NextRegister();
         char *commentStr = malloc(sizeof(char) * 512);
 
-        if ( (var = lookup($1.str)) == NULL)
+        if ( (var = lookup($1.str)) == NULL) {
             printf("*** ERROR ***: Variable %s used without being defined.\n", $1.str);
+            return;
+        }
 
         $$.targetRegister = newReg;
-        $$.type = TYPE_INT;
+        $$.type = var->type;
 
         sprintf(commentStr, "Loading %s into register r%d.", $1.str, newReg);
         emitComment(commentStr);
