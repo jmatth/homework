@@ -58,7 +58,7 @@ lookup(char *name) {
 
 
 void
-insert(char *name, Type_Expression type, int offset) {
+insert(char *name, Type_Expression type, int offset, Class_Expression cl, int indices) {
   int currentIndex;
   int visitedSlots = 0;
 
@@ -79,6 +79,8 @@ insert(char *name, Type_Expression type, int offset) {
   strcpy(HashTable[currentIndex]->name, name);
   HashTable[currentIndex]->type = type; /* type expression */
   HashTable[currentIndex]->offset = offset; /* in bytes */
+  HashTable[currentIndex]->cl = cl;
+  HashTable[currentIndex]->indices = indices;
 }
 
 static
@@ -94,6 +96,17 @@ TypeToString(Type_Expression type)
   }
 }
 
+static
+char *
+ClassToString(Class_Expression cl) {
+    switch (cl) {
+        case CL_SCALAR: return("Scalar"); break;
+        case CL_ARR: return("Array"); break;
+        default: printf("*** ERROR in ClassToString\n");
+                 return "ERROR in ClassToString";
+    }
+}
+
 
 void
 PrintSymbolTable() {
@@ -102,11 +115,22 @@ PrintSymbolTable() {
   printf("\n --- Symbol Table ---------------\n\n");
   for (i=0; i < HASH_TABLE_SIZE; i++) {
     if (HashTable[i] != NULL) {
-      printf("\t \"%s\" of type %s with offset %d\n",
-		HashTable[i]->name, TypeToString(HashTable[i]->type), HashTable[i]->offset);
+      if (HashTable[i]->cl == CL_ARR)
+        printf("\t %s \"%s\" of type %s with offset %d and size %d\n",
+                ClassToString(HashTable[i]->cl),
+                HashTable[i]->name,
+                TypeToString(HashTable[i]->type),
+                HashTable[i]->offset,
+                HashTable[i]->indices
+        );
+      else
+        printf("\t %s \"%s\" of type %s with offset %d\n",
+                ClassToString(HashTable[i]->cl),
+                HashTable[i]->name,
+                TypeToString(HashTable[i]->type),
+                HashTable[i]->offset
+        );
     }
   }
   printf("\n --------------------------------\n\n");
 }
-
-

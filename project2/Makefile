@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -g
 
-OBJs = parse.tab.o symtab.o attr.o instrutil.o lex.yy.o dequeue.o
+OBJs = parse.tab.o symtab.o attr.o instrutil.o lex.yy.o
 
 default: codegen
 
@@ -12,12 +12,9 @@ lex.yy.c: scan.l parse.tab.h attr.h
 	flex -i scan.l
 
 parse.tab.c: parse.y attr.h symtab.h instrutil.h
-	bison -dvt parse.y
+	bison -dv parse.y
 
 parse.tab.h: parse.tab.c
-
-dequeue.o: dequeue.h dequeue.c
-	gcc -g -O -c dequeue.c
 
 clean:
 	rm -f codegen lex.yy.c *.o parse.tab.[ch] parse.output iloc.out

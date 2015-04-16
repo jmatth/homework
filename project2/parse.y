@@ -1,13 +1,14 @@
 %{
 #include <stdio.h>
+#include <stdarg.h>
 #include "attr.h"
 #include "instrutil.h"
 int yylex();
 void yyerror(char * s);
 #include "symtab.h"
-#include "dequeue.h"
 #include "errors.h"
 #include <string.h>
+#include "dequeue.c"
 
 FILE *outfile;
 char *CommentBuffer;
@@ -47,6 +48,52 @@ char *CommentBuffer;
 %nonassoc THEN
 %nonassoc ELSE
 
+%{
+/* Helper functions */
+void dereference_arr(regInfo *res, tokentype *id, regInfo *index) {
+  int indexReg;
+  int newReg;
+  int tmpReg;
+  int tmpReg2;
+  SymTabEntry *var;
+
+  tmpReg = NextRegister();
+  tmpReg2 = NextRegister();
+  newReg = NextRegister();
+
+  indexReg = index->targetRegister;
+  res->targetRegister = newReg;
+
+  if ( (var = lookup(id->str)) == NULL) {
+    printf(ERR_VARIABLE_NOT_DECLARED, id->str);
+    return;
+  }
+
+  res->type = var->type;
+
+  if ( index->type != TYPE_INT ) {
+    printf(ERR_INDEX_NOT_INTEGER);
+    return;
+  }
+
+  emit(NOLABEL, LOADI, 4, tmpReg, EMPTY);
+  emit(NOLABEL, MULT, tmpReg, indexReg, tmpReg2);
+  emit(NOLABEL, ADDI, tmpReg2, var->offset, newReg);
+}
+
+void format_comment(const char *format, ...) {
+  va_list args;
+  char *comment_str;
+
+  va_start(args, format);
+  comment_str = malloc(sizeof(char) * 512);
+  vsprintf(comment_str, format, args);
+  emitComment(comment_str);
+  free(comment_str);
+  va_end(args);
+}
+%}
+
 %%
 program : {
             emitComment("Assign STATIC_AREA_ADDRESS to register \"r0\"");
@@ -71,7 +118,7 @@ vardcl : idlist ':' type {
           char *var_name;
 
           while ( (var_name = ldequeue(&$1.dequeue)) != NULL )
-            insert(var_name, $3.num, NextOffset(1));
+            insert(var_name, $3.num, NextOffset(1 * $3.sz), $3.cl, $3.sz);
        }
        ;
 
@@ -89,9 +136,16 @@ idlist : idlist ',' ID {
   ;
 
 
-type : ARRAY '[' ICONST ']' OF stype {  }
-
-     | stype { $$.num = $1.num; }
+type : ARRAY '[' ICONST ']' OF stype {
+        $$.num = $6.num;
+        $$.cl = CL_ARR;
+        $$.sz = $3.num;
+     }
+     | stype {
+        $$.num = $1.num;
+        $$.cl = CL_SCALAR;
+        $$.sz = 1;
+     }
      ;
 
 stype : INT { $$.num = TYPE_INT; }
@@ -186,7 +240,6 @@ astmt : lhs ASG exp {
 
 lhs : ID {
       SymTabEntry *var;
-      char *commentString = malloc(sizeof(char) * 512);
       int newReg1 = NextRegister();
       int newReg2 = NextRegister();
 
@@ -199,13 +252,17 @@ lhs : ID {
 
       $$.type = var->type;
 
-      sprintf(commentString, "Loading %s's offset into r%d", var->name, newReg2);
-      emitComment(commentString);
+      /* format_comment("Loading %s's offset into r%d", var->name, newReg2); */
       emit(NOLABEL, LOADI, var->offset, newReg1, EMPTY);
       emit(NOLABEL, ADD, 0, newReg1, newReg2);
-      free(commentString);
     }
-    |  ID '[' exp ']' {  }
+    |  ID '[' exp ']' {
+      SymTabEntry *var = lookup($1.str);
+      if (var != NULL)
+        format_comment("Load LHS value of array variable \"%s\" with based address %d",
+                       $1.str, var->offset);
+      dereference_arr(&$$, &$1, &$3);
+    }
     ;
 
 
@@ -213,7 +270,7 @@ exp : exp '+' exp {
       int newReg = NextRegister();
 
       if (! (($1.type == TYPE_INT) && ($3.type == TYPE_INT))) {
-        printf("*** ERROR ***: Operator types must be integer.\n");
+        printf(ERR_OPERAND_NOT_INTEGER);
       }
 
       $$.type = $1.type;
@@ -229,7 +286,7 @@ exp : exp '+' exp {
       int newReg = NextRegister();
 
       if (! (($1.type == TYPE_INT) && ($3.type == TYPE_INT))) {
-        printf("*** ERROR ***: Operator types must be integer.\n");
+        printf(ERR_OPERAND_NOT_INTEGER);
       }
 
       $$.type = $1.type;
@@ -245,7 +302,7 @@ exp : exp '+' exp {
       int newReg = NextRegister();
 
       if (! (($1.type == TYPE_INT) && ($3.type == TYPE_INT))) {
-        printf("*** ERROR ***: Operator types must be integer.\n");
+        printf(ERR_OPERAND_NOT_INTEGER);
       }
 
       $$.type = $1.type;
@@ -295,7 +352,6 @@ exp : exp '+' exp {
     | ID {
         SymTabEntry *var;
         int newReg = NextRegister();
-        char *commentStr = malloc(sizeof(char) * 512);
 
         if ( (var = lookup($1.str)) == NULL) {
             printf("*** ERROR ***: Variable %s used without being defined.\n", $1.str);
@@ -305,15 +361,21 @@ exp : exp '+' exp {
         $$.targetRegister = newReg;
         $$.type = var->type;
 
-        sprintf(commentStr, "Loading %s into register r%d.", $1.str, newReg);
-        emitComment(commentStr);
-        free(commentStr);
-
+        format_comment("Loading %s into register r%d.", $1.str, newReg);
         emit(NOLABEL, LOADAI, 0, var->offset, newReg);
-
     }
 
-    | ID '[' exp ']' {   }
+    | ID '[' exp ']' {
+      int newReg;
+      SymTabEntry *var = lookup($1.str);
+      if (var != NULL)
+        format_comment("Load RHS value of array variable \"%s\" with based address %d",
+                       $1.str, var->offset);
+      dereference_arr(&$$, &$1, &$3);
+      newReg = NextRegister();
+      emit(NOLABEL, LOAD, $$.targetRegister, newReg, EMPTY);
+      $$.targetRegister = newReg;
+    }
 
 
 
