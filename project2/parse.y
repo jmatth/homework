@@ -18,6 +18,7 @@ char *CommentBuffer;
 %union {
   tokentype token;
   regInfo targetReg;
+  loopcontrol loopctrl;
 }
 
 %token PROG PERIOD VAR
@@ -38,6 +39,7 @@ char *CommentBuffer;
 %type <targetReg> condexp
 %type <targetReg> ifhead
 %type <targetReg> ifstmt
+%type <loopctrl> WHILE
 
 %start program
 
@@ -216,9 +218,19 @@ fstmt : FOR ctrlexp DO
         ENDFOR
   ;
 
-wstmt : WHILE  {  }
-        condexp {  }
-        DO stmt  {  }
+wstmt : WHILE {
+          $1.controlLabel = NextLabel();
+          $1.bodyLabel = NextLabel();
+          $1.postLabel = NextLabel();
+          emit($1.controlLabel, NOP, EMPTY, EMPTY, EMPTY);
+        } condexp {
+          emit(NOLABEL, CBR, $3.targetRegister, $1.bodyLabel, $1.postLabel);
+          emit($1.bodyLabel, NOP, EMPTY, EMPTY, EMPTY);
+        }
+        DO stmt {
+          emit(NOLABEL, BR, $1.controlLabel, EMPTY, EMPTY);
+          emit($1.postLabel, NOP, EMPTY, EMPTY, EMPTY);
+        }
         ENDWHILE
   ;
 

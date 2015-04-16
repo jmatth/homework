@@ -35,4 +35,10 @@ typedef struct {
     int controlLabel;
 } regInfo;
 
+typedef struct {
+    int controlLabel;
+    int bodyLabel;
+    int postLabel;
+} loopcontrol;
+
 #endif
