@@ -236,9 +236,8 @@ wstmt : WHILE {
 
 
 astmt : lhs ASG exp {
-        if (! ((($1.type == TYPE_INT) && ($3.type == TYPE_INT)) ||
-              (($1.type == TYPE_BOOL) && ($3.type == TYPE_BOOL)))) {
-          printf("*** ERROR ***: Assignment types do not match.\n");
+        if ( $1.type != $3.type ) {
+          printf(ERR_ASSIGNMENT_TYPES_MATCH);
         }
 
         emit(NOLABEL,
@@ -261,6 +260,9 @@ lhs : ID {
         printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
         return;
       }
+      if ( var->cl != CL_SCALAR ) {
+        printf(ERR_VARIABLE_NOT_SCALAR, $1.str);
+      }
 
       $$.type = var->type;
 
@@ -270,9 +272,16 @@ lhs : ID {
     }
     |  ID '[' exp ']' {
       SymTabEntry *var = lookup($1.str);
-      if (var != NULL)
-        format_comment("Load LHS value of array variable \"%s\" with based address %d",
-                       $1.str, var->offset);
+      if (var == NULL) {
+        printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
+        return;
+      }
+      if (var->cl != CL_ARR) {
+        printf(ERR_VARIABLE_NOT_ARRAY, $1.str);
+      }
+
+      format_comment("Load LHS value of array variable \"%s\" with based address %d",
+                      $1.str, var->offset);
       dereference_arr(&$$, &$1, &$3);
     }
     ;
@@ -331,7 +340,7 @@ exp : exp '+' exp {
       int newReg = NextRegister();
 
       if (! (($1.type == TYPE_BOOL) && ($3.type == TYPE_BOOL))) {
-        printf("*** ERROR ***: Operator types must be boolean.\n");
+        printf(ERR_OPERAND_NOT_BOOLEAN);
       }
 
       $$.type = $1.type;
@@ -347,7 +356,7 @@ exp : exp '+' exp {
       int newReg = NextRegister();
 
       if (! (($1.type == TYPE_BOOL) && ($3.type == TYPE_BOOL))) {
-        printf("*** ERROR ***: Operator types must be boolean.\n");
+        printf(ERR_OPERAND_NOT_BOOLEAN);
       }
 
       $$.type = $1.type;
@@ -380,9 +389,16 @@ exp : exp '+' exp {
     | ID '[' exp ']' {
       int newReg;
       SymTabEntry *var = lookup($1.str);
-      if (var != NULL)
-        format_comment("Load RHS value of array variable \"%s\" with based address %d",
-                       $1.str, var->offset);
+      if (var == NULL) {
+        printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
+        return;
+      }
+      if (var->cl != CL_ARR) {
+        printf(ERR_VARIABLE_NOT_ARRAY, $1.str);
+      }
+
+      format_comment("Load RHS value of array variable \"%s\" with based address %d",
+                      $1.str, var->offset);
       dereference_arr(&$$, &$1, &$3);
       newReg = NextRegister();
       emit(NOLABEL, LOAD, $$.targetRegister, newReg, EMPTY);

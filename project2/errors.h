@@ -4,7 +4,7 @@
 
 #define ERR_INDUCTION_NOT_DECLARED "\n*** ERROR ***: Induction variable %s not declared.\n"
 #define ERR_INDUCTION_NOT_SCALAR "\n*** ERROR ***: Induction variable %s not a scalar of type integer.\n"
-#define ERR_ASSIGNMENT_TYPES_MATCH "\n*** ERROR ***: Assignment types do not match.\n");
+#define ERR_ASSIGNMENT_TYPES_MATCH "\n*** ERROR ***: Assignment types do not match.\n"
 #define ERR_VARIABLE_NOT_DECLARED "\n*** ERROR ***: Variable %s not declared.\n"
 #define ERR_VARIABLE_NOT_SCALAR "\n*** ERROR ***: Variable %s is not a scalar variable.\n"
 #define ERR_VARIABLE_NOT_ARRAY "\n*** ERROR ***: Variable %s is not an array variable.\n"
