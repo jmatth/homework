@@ -424,8 +424,10 @@ ctrlexp : ID ASG ICONST ',' ICONST {
           int endLabel = NextLabel();
 
           if( (var = lookup($1.str)) == NULL) {
-            printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
+            printf(ERR_INDUCTION_NOT_DECLARED, $1.str);
             return;
+          } else if ( var->type != TYPE_INT ) {
+            printf(ERR_INDUCTION_NOT_SCALAR, $1.str);
           }
 
           $$.controlLabel = controlLabel;
