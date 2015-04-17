@@ -459,21 +459,37 @@ condexp : exp NEQ exp {
           emit(NOLABEL, CMPEQ, $1.targetRegister, $3.targetRegister, newReg);
         }
         | exp LT exp {
+          if ( !($1.type == TYPE_INT && $3.type == TYPE_INT) ) {
+            printf(ERR_RELATIONAL_ILLEGAL_TYPE);
+          }
+
           int newReg = NextRegister();
           $$.targetRegister = newReg;
           emit(NOLABEL, CMPLT, $1.targetRegister, $3.targetRegister, newReg);
         }
         | exp LEQ exp {
+          if ( !($1.type == TYPE_INT && $3.type == TYPE_INT) ) {
+            printf(ERR_RELATIONAL_ILLEGAL_TYPE);
+          }
+
           int newReg = NextRegister();
           $$.targetRegister = newReg;
           emit(NOLABEL, CMPLE, $1.targetRegister, $3.targetRegister, newReg);
         }
         | exp GT exp {
+          if ( !($1.type == TYPE_INT && $3.type == TYPE_INT) ) {
+            printf(ERR_RELATIONAL_ILLEGAL_TYPE);
+          }
+
           int newReg = NextRegister();
           $$.targetRegister = newReg;
           emit(NOLABEL, CMPGT, $1.targetRegister, $3.targetRegister, newReg);
         }
         | exp GEQ exp {
+          if ( !($1.type == TYPE_INT && $3.type == TYPE_INT) ) {
+            printf(ERR_RELATIONAL_ILLEGAL_TYPE);
+          }
+
           int newReg = NextRegister();
           $$.targetRegister = newReg;
           emit(NOLABEL, CMPGE, $1.targetRegister, $3.targetRegister, newReg);
