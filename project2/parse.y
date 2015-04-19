@@ -375,7 +375,7 @@ exp : exp '+' exp {
         int newReg = NextRegister();
 
         if ( (var = lookup($1.str)) == NULL) {
-            printf("*** ERROR ***: Variable %s used without being defined.\n", $1.str);
+            printf(ERR_VARIABLE_NOT_DECLARED, $1.str);
             return;
         }
 
@@ -465,11 +465,17 @@ ctrlexp : ID ASG ICONST ',' ICONST {
 
 
 condexp : exp NEQ exp {
+          if ($1.type != $3.type) {
+            printf(ERR_EQUALS_WITH_DIFFERENT_TYPES);
+          }
           int newReg = NextRegister();
           $$.targetRegister = newReg;
           emit(NOLABEL, CMPNE, $1.targetRegister, $3.targetRegister, newReg);
         }
         | exp EQ exp {
+          if ($1.type != $3.type) {
+            printf(ERR_EQUALS_WITH_DIFFERENT_TYPES);
+          }
           int newReg = NextRegister();
           $$.targetRegister = newReg;
           emit(NOLABEL, CMPEQ, $1.targetRegister, $3.targetRegister, newReg);
@@ -544,5 +550,5 @@ main(int argc, char* argv[]) {
 
   fclose(outfile);
 
-  return 1;
+  return 0;
 }
