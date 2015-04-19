@@ -8,7 +8,6 @@ void yyerror(char * s);
 #include "symtab.h"
 #include "errors.h"
 #include <string.h>
-#include "dequeue.c"
 
 FILE *outfile;
 char *CommentBuffer;

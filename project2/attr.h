@@ -7,7 +7,28 @@
 #ifndef ATTR_H
 #define ATTR_H
 
-#include "dequeue.h"
+struct Node {
+    struct Node *prev;
+    struct Node *next;
+    void *data;
+};
+
+typedef struct Node* Node;
+
+struct Dequeue{
+    Node left;
+    Node right;
+};
+
+typedef struct Dequeue* Dequeue;
+
+void initDequeue(Dequeue);
+
+int rinsert(Dequeue, void*);
+int linsert(Dequeue, void*);
+
+void* rdequeue(Dequeue);
+void* ldequeue(Dequeue);
 
 typedef struct {
     int num;
