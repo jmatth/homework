@@ -1,8 +1,8 @@
 /**********************************************
-  CS415  Project 2
+  CS415  Project 2/3
   Spring  2015
-Author: Ulrich Kremer
- **********************************************/
+  Author: Ulrich Kremer
+**********************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,6 +62,14 @@ emit(int label_index,
     switch (opcode) { /* ---------------------- NON OPTIMIZED ------------------------------- */
         case NOP:
             fprintf(outfile, "%s\t nop \n", label);
+            break;
+        case VECTON:
+            /* Example: vecton */
+            fprintf(outfile, "%s\t vecton \n", label);
+            break;
+        case VECTOFF:
+            /* Example: vectoff */
+            fprintf(outfile, "%s\t vectoff \n", label);
             break;
         case ADDI:
             /* Example: addI r1, 1024 => r1 */
@@ -154,7 +162,3 @@ emit(int label_index,
             fprintf(stderr, "Illegal instruction in \"emit\" \n");
     }
 }
-
-
-
-
