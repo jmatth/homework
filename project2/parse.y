@@ -6,7 +6,6 @@
 int yylex();
 void yyerror(char * s);
 #include "symtab.h"
-#include "errors.h"
 #include <string.h>
 
 FILE *outfile;
