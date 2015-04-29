@@ -1,0 +1,8 @@
+program main;
+var a, b: array[100] of integer;
+    i: integer;
+begin
+  for i := 1, 100 do
+    a[i] := a[i] + b[i] + 5
+  endfor
+end.

@@ -1,0 +1,14 @@
+program main;
+var a, b: integer;
+    i: integer;
+begin
+  a := 1;
+  b := 10;
+  for i:=1,100 do
+    a := a + 2
+  endfor;
+  for i:=1,100 do
+    b := b + 1
+  endfor;
+  print(a)
+end.
