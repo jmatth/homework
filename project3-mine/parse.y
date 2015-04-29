@@ -38,6 +38,8 @@ char *CommentBuffer;
 %type <targetReg> condexp
 %type <targetReg> ifhead
 %type <targetReg> ifstmt
+%type <targetReg> stmt
+%type <targetReg> astmt
 %type <loopctrl> WHILE
 
 %start program
@@ -161,7 +163,9 @@ stmtlist : stmtlist ';' stmt { }
 stmt    : ifstmt { }
         | fstmt { }
         | wstmt { }
-        | astmt { }
+        | astmt {
+          $$.canVector = $1.canVector;
+        }
         | writestmt { }
         | cmpdstmt { }
         ;
@@ -211,8 +215,18 @@ writestmt : PRINT '(' exp ')' {
 
 fstmt : FOR ctrlexp DO
         stmt {
+          // go back to start of loop
           emit(NOLABEL, BR, $2.controlLabel, EMPTY, EMPTY);
-          emit($2.endLabel, NOP, EMPTY, EMPTY, EMPTY);
+
+          // turn vectorization on or off
+          emit($2.vectLabel, NOP, EMPTY, EMPTY, EMPTY);
+          if ($4.canVector) {
+            emit(NOLABEL, VECTON, EMPTY, EMPTY, EMPTY);
+          }
+          emit(NOLABEL, BR, $2.controlLabel, EMPTY, EMPTY);
+
+          // we're done here
+          emit($2.endLabel, VECTOFF, EMPTY, EMPTY, EMPTY);
         }
         ENDFOR
   ;
@@ -245,6 +259,9 @@ astmt : lhs ASG exp {
              $1.targetRegister,
              EMPTY
         );
+
+        // FIXME: vector checks
+        $$.canVector = 1;
       }
       ;
 
@@ -263,6 +280,8 @@ lhs : ID {
         printf(ERR_VARIABLE_NOT_SCALAR, $1.str);
       }
 
+      strcpy($$.varName, $1.str);
+
       $$.type = var->type;
 
       /* format_comment("Loading %s's offset into r%d", var->name, newReg2); */
@@ -278,6 +297,8 @@ lhs : ID {
       if (var->cl != CL_ARR) {
         printf(ERR_VARIABLE_NOT_ARRAY, $1.str);
       }
+
+      strcpy($$.varName, $1.str);
 
       format_comment("Load LHS value of array variable \"%s\" with based address %d",
                       $1.str, var->offset);
@@ -381,6 +402,8 @@ exp : exp '+' exp {
         $$.targetRegister = newReg;
         $$.type = var->type;
 
+        strcpy($$.varName, $1.str);
+
         format_comment("Loading %s into register r%d.", $1.str, newReg);
         emit(NOLABEL, LOADAI, 0, var->offset, newReg);
     }
@@ -395,6 +418,8 @@ exp : exp '+' exp {
       if (var->cl != CL_ARR) {
         printf(ERR_VARIABLE_NOT_ARRAY, $1.str);
       }
+
+      strcpy($$.varName, $1.str);
 
       format_comment("Load RHS value of array variable \"%s\" with based address %d",
                       $1.str, var->offset);
@@ -437,6 +462,7 @@ ctrlexp : ID ASG ICONST ',' ICONST {
           int controlLabel = NextLabel();
           int bodyLabel = NextLabel();
           int endLabel = NextLabel();
+          int vectLabel = NextLabel();
 
           if( (var = lookup($1.str)) == NULL) {
             printf(ERR_INDUCTION_NOT_DECLARED, $1.str);
@@ -447,10 +473,13 @@ ctrlexp : ID ASG ICONST ',' ICONST {
 
           $$.controlLabel = controlLabel;
           $$.endLabel = endLabel;
+          $$.vectLabel = vectLabel;
 
           //Initialize the LCV
           emit(NOLABEL, LOADI, $3.num - 1, tmpReg, EMPTY);
           emit(NOLABEL, STOREAI, tmpReg, 0, var->offset);
+          // Jump to the the vector nonsense
+          emit(NOLABEL, BR, vectLabel, EMPTY, EMPTY);
           //Retrieve the LCV and test if the loop is over
           emit(controlLabel, LOADAI, 0, var->offset, newReg);
           emit(NOLABEL, ADDI, newReg, 1, newReg);

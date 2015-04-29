@@ -54,6 +54,9 @@ typedef struct {
     int targetRegister;
     int endLabel;
     int controlLabel;
+    int canVector;
+    int vectLabel;
+    char varName[64];
 } regInfo;
 
 typedef struct {
