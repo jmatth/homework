@@ -9,6 +9,7 @@ void yyerror(char * s);
 #include <string.h>
 
 FILE *outfile;
+FILE *depstats;
 char *CommentBuffer;
 
 %}
@@ -529,13 +530,19 @@ int optimize_flag = 0;
 int
 main(int argc, char* argv[]) {
 
-  printf("\n     CS415 Spring 2015 Compiler\n\n");
+  printf("\n     CS415 Spring 2015 Vectorizing Compiler\n\n");
 
   outfile = fopen("iloc.out", "w");
     if (outfile == NULL) {
       printf("ERROR: cannot open output file \"iloc.out\".\n");
       return -1;
     }
+
+  depstats = fopen("stats.log", "w");
+  if (depstats == NULL) {
+    printf("ERROR: cannot open output file \"stats.log\".\n");
+    return -1;
+  }
 
   CommentBuffer = (char *) malloc(500);
   InitSymbolTable();
@@ -547,6 +554,7 @@ main(int argc, char* argv[]) {
   PrintSymbolTable();
 
   fclose(outfile);
+  fclose(depstats);
 
   return 0;
 }
