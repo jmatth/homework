@@ -49,14 +49,32 @@ typedef enum class_expression {
     CL_ARR
 } Class_Expression;
 
-typedef struct {
+struct arrDeps {
+    int is_arr;
+    int is_constant;
+    int has_i;
+    int i;
+    int has_c;
+    int c;
+    char iName[64];
+    char arrName[64];
+};
+
+typedef struct regInfo {
     Type_Expression type;
     int targetRegister;
     int endLabel;
     int controlLabel;
     int canVector;
     int vectLabel;
+    int startRange;
+    int endRange;
+    struct arrDeps deps;
+    struct regInfo *lhs;
+    struct regInfo *rhs;
     char varName[64];
+    struct Dequeue vars;
+    struct Dequeue arrExprs;
 } regInfo;
 
 typedef struct {

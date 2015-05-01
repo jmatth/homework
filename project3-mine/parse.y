@@ -166,6 +166,8 @@ stmt    : ifstmt { }
         | wstmt { }
         | astmt {
           $$.canVector = $1.canVector;
+          $$.lhs = $1.lhs;
+          $$.rhs = $1.rhs;
         }
         | writestmt { }
         | cmpdstmt { }
@@ -219,9 +221,49 @@ fstmt : FOR ctrlexp DO
           // go back to start of loop
           emit(NOLABEL, BR, $2.controlLabel, EMPTY, EMPTY);
 
+          int canVector = 0;
+          // same variable on both sides?
+          char *str;
+          if ($4.rhs != NULL) {
+            canVector = 1;
+            while ( (str = rdequeue(&($4.rhs->vars))) != NULL ) {
+              if ( strcmp(str, $4.lhs->varName) == 0) {
+                printf("Found dependency on %s\n", str);
+                canVector = 0;
+                break;
+              }
+            }
+
+            if (canVector) {
+              if (!$4.lhs->deps.is_arr) {
+                printf("\nlhs not an array\n");
+                canVector = 0;
+              } else {
+                /* printf("\nLHS: C: %d, i: %s,\nRHS: C: %d\n", */
+                /*        $4.lhs->deps.c, $4.lhs->deps.iName, */
+                /*        $4.rhs->deps.c); */
+                // ZIV
+                if ($4.rhs->deps.is_constant) {
+                  int c2 = $4.rhs->deps.c;
+                  int c1 = $4.lhs->deps.c;
+                  if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
+                    canVector = 0;
+                  } else {
+                    canVector = 1;
+                    printf("VECTORING");
+                  }
+                } else {
+                  canVector = 0;
+                }
+              }
+            }
+          } else {
+            printf("rhs is null\n");
+          }
+
           // turn vectorization on or off
           emit($2.vectLabel, NOP, EMPTY, EMPTY, EMPTY);
-          if ($4.canVector) {
+          if (canVector) {
             emit(NOLABEL, VECTON, EMPTY, EMPTY, EMPTY);
           }
           emit(NOLABEL, BR, $2.controlLabel, EMPTY, EMPTY);
@@ -261,8 +303,8 @@ astmt : lhs ASG exp {
              EMPTY
         );
 
-        // FIXME: vector checks
-        $$.canVector = 1;
+        $$.lhs = &$1;
+        $$.rhs = &$3;
       }
       ;
 
@@ -284,6 +326,8 @@ lhs : ID {
       strcpy($$.varName, $1.str);
 
       $$.type = var->type;
+      $$.deps.has_i = 0;
+      $$.deps.has_c = 0;
 
       /* format_comment("Loading %s's offset into r%d", var->name, newReg2); */
       emit(NOLABEL, LOADI, var->offset, newReg1, EMPTY);
@@ -300,6 +344,9 @@ lhs : ID {
       }
 
       strcpy($$.varName, $1.str);
+
+      memcpy(&$$.deps, &$3.deps, sizeof(struct arrDeps));
+      $$.deps.is_arr = 1;
 
       format_comment("Load LHS value of array variable \"%s\" with based address %d",
                       $1.str, var->offset);
@@ -323,6 +370,33 @@ exp : exp '+' exp {
            $3.targetRegister,
            newReg
       );
+
+      if ( $1.deps.is_arr || $3.deps.is_arr) {
+        if ( $1.deps.is_arr ) {
+          initDequeue(&$$.arrExprs);
+          linsert(&$$.arrExprs, &$1.deps);
+        }
+        if ( $3.deps.is_arr ) {
+          initDequeue(&$$.arrExprs);
+          linsert(&$$.arrExprs, &$3.deps);
+        }
+      }
+      else if ( (*$1.deps.iName != '\0' && *$3.deps.iName == '\0') ) {
+        strcpy($$.deps.iName, $1.deps.iName);
+        $$.deps.c = $3.deps.c;
+        $3.deps.has_c = 1;
+      } else if ( (*$1.deps.iName == '\0' && *$3.deps.iName != '\0') ) {
+        strcpy($$.deps.iName, $3.deps.iName);
+        $$.deps.c = $1.deps.c;
+        $1.deps.has_c = 1;
+      }
+
+      initDequeue(&$$.vars);
+      char *str;
+      while( (str = rdequeue(&$1.vars) ) != NULL )
+        linsert(&$$.vars, str);
+      while( (str = rdequeue(&$3.vars) ) != NULL )
+        linsert(&$$.vars, str);
     }
     | exp '-' exp {
       int newReg = NextRegister();
@@ -339,6 +413,19 @@ exp : exp '+' exp {
            $3.targetRegister,
            newReg
       );
+
+      initDequeue(&$$.vars);
+      char *str;
+      while( (str = rdequeue(&$1.vars) ) != NULL )
+        linsert(&$$.vars, str);
+      while( (str = rdequeue(&$3.vars) ) != NULL )
+        linsert(&$$.vars, str);
+
+      $$.deps.is_constant = $1.deps.is_constant && $3.deps.is_constant;
+      $$.deps.has_c = $1.deps.has_c + $3.deps.has_c;
+      $$.deps.c = - $3.deps.c;
+      strcpy($$.deps.iName, $1.deps.iName);
+      $$.deps.has_i = $1.deps.has_i;
     }
     | exp '*' exp {
       int newReg = NextRegister();
@@ -355,6 +442,13 @@ exp : exp '+' exp {
            $3.targetRegister,
            newReg
       );
+
+      initDequeue(&$$.vars);
+      char *str;
+      while( (str = rdequeue(&$1.vars) ) != NULL )
+        linsert(&$$.vars, str);
+      while( (str = rdequeue(&$3.vars) ) != NULL )
+        linsert(&$$.vars, str);
     }
 
     | exp AND exp {
@@ -372,6 +466,13 @@ exp : exp '+' exp {
            $3.targetRegister,
            newReg
       );
+
+      initDequeue(&$$.vars);
+      char *str;
+      while( (str = rdequeue(&$1.vars) ) != NULL )
+        linsert(&$$.vars, str);
+      while( (str = rdequeue(&$3.vars) ) != NULL )
+        linsert(&$$.vars, str);
     }
     | exp OR exp {
       int newReg = NextRegister();
@@ -388,6 +489,13 @@ exp : exp '+' exp {
            $3.targetRegister,
            newReg
       );
+
+      initDequeue(&$$.vars);
+      char *str;
+      while( (str = rdequeue(&$1.vars) ) != NULL )
+        linsert(&$$.vars, str);
+      while( (str = rdequeue(&$3.vars) ) != NULL )
+        linsert(&$$.vars, str);
     }
 
 
@@ -404,9 +512,14 @@ exp : exp '+' exp {
         $$.type = var->type;
 
         strcpy($$.varName, $1.str);
+        strcpy($$.deps.iName, $1.str);
 
         format_comment("Loading %s into register r%d.", $1.str, newReg);
         emit(NOLABEL, LOADAI, 0, var->offset, newReg);
+
+        initDequeue(&$$.vars);
+        char *str;
+        rinsert(&$$.vars, $1.str);
     }
 
     | ID '[' exp ']' {
@@ -428,6 +541,16 @@ exp : exp '+' exp {
       newReg = NextRegister();
       emit(NOLABEL, LOAD, $$.targetRegister, newReg, EMPTY);
       $$.targetRegister = newReg;
+
+      char *str;
+      initDequeue(&$$.vars);
+      while ( (str = rdequeue(&$3.vars) ) != NULL )
+        linsert(&$$.vars, str);
+      rinsert(&$$.vars, str);
+
+      memcpy(&$$.deps, &$3.deps, sizeof(struct arrDeps));
+      strcpy($$.deps.arrName, $1.str);
+      $$.deps.is_arr = 1;
     }
 
 
@@ -436,7 +559,11 @@ exp : exp '+' exp {
       int newReg = NextRegister();
       $$.targetRegister = newReg;
       $$.type = TYPE_INT;
+      $$.deps.is_constant = 1;
+      $$.deps.has_c = 1;
+      $$.deps.c = $1.num;
       emit(NOLABEL, LOADI, $1.num, newReg, EMPTY);
+      initDequeue(&$$.vars);
     }
 
     | TRUE {
@@ -444,12 +571,14 @@ exp : exp '+' exp {
       $$.targetRegister = newReg;
       $$.type = TYPE_BOOL;
       emit(NOLABEL, LOADI, 1, newReg, EMPTY);
+      initDequeue(&$$.vars);
     }
     | FALSE {
       int newReg = NextRegister(); /* TRUE is encoded as value '0' */
       $$.targetRegister = newReg;
       $$.type = TYPE_BOOL;
       emit(NOLABEL, LOADI, 0, newReg, EMPTY);
+      initDequeue(&$$.vars);
     }
     | error { yyerror("***Error: illegal expression\n");}
     ;
@@ -475,6 +604,8 @@ ctrlexp : ID ASG ICONST ',' ICONST {
           $$.controlLabel = controlLabel;
           $$.endLabel = endLabel;
           $$.vectLabel = vectLabel;
+          $$.startRange = $3.num;
+          $$.endRange = $5.num;
 
           //Initialize the LCV
           emit(NOLABEL, LOADI, $3.num - 1, tmpReg, EMPTY);
