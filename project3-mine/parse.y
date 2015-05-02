@@ -225,35 +225,67 @@ fstmt : FOR ctrlexp DO
           // same variable on both sides?
           char *str;
           if ($4.rhs != NULL) {
+
+            /* printf("\nlhs varname: %s\n", $4.lhs->varName); */
+            /* printf("rhs: 0x%x\n", $4.rhs); */
+            /* printf("rhs dequeue left: 0x%x\n", $4.rhs->vars.left); */
+            /* printf("rhs dequeue left str: %s", (char*)$4.rhs->vars.left->data); */
+
             canVector = 1;
             while ( (str = rdequeue(&($4.rhs->vars))) != NULL ) {
+              printf("\n checking %s against %s\n", str, $4.lhs->varName);
               if ( strcmp(str, $4.lhs->varName) == 0) {
-                printf("Found dependency on %s\n", str);
+                /* printf("Found possible dependency on %s\n", str); */
                 canVector = 0;
                 break;
               }
             }
 
-            if (canVector) {
+            if (!canVector) {
               if (!$4.lhs->deps.is_arr) {
                 printf("\nlhs not an array\n");
                 canVector = 0;
               } else {
+                printf("\nSIV and ZIV\n");
                 struct arrDeps *rhsDeps;
+                int c1 = $4.lhs->deps.c;
+                int a = $4.lhs->deps.a;
+                double d;
+                if (! $4.rhs->deps.has_a)
+                  a = 1;
                 while ( (rhsDeps = rdequeue(&$4.rhs->arrExprs)) != NULL ) {
-                  // ZIV
                   if (rhsDeps->is_constant) {
+                    // ZIV
                     int c2 = rhsDeps->c;
-                    int c1 = $4.lhs->deps.c;
+                    printf("\nZIV with c1=%d c2=%d\n", c1, c2);
                     if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
                       canVector = 0;
                       break;
+                    } else {
+                      canVector = 1;
+                    }
+                  } else {
+                    // SIV
+                    int c2 = rhsDeps->c;
+                    if (rhsDeps->a != a) {
+                      canVector = 0;
+                      break;
+                    }
+
+                    d = ((double)(c1 - c2)) / (double)a;
+                    printf("\nSIV with c1=%d c2=%d, a=%d, d=%f\n", c1, c2, a, d);
+                    if (d == (int)d && d <= $2.endRange - $2.startRange) {
+                      // dependence with distance d
+                      canVector = 0;
+                      break;
+                    } else {
+                      canVector = 1;
                     }
                   }
                 }
               }
-              printf("\ncanVector: %d\n", canVector);
             }
+            printf("\ncanVector: %d\n", canVector);
           } else {
             printf("rhs is null\n");
           }
@@ -323,7 +355,6 @@ lhs : ID {
       strcpy($$.varName, $1.str);
 
       $$.type = var->type;
-      $$.deps.has_i = 0;
       $$.deps.has_c = 0;
 
       /* format_comment("Loading %s's offset into r%d", var->name, newReg2); */
@@ -379,13 +410,19 @@ exp : exp '+' exp {
       }
       else if ( (*$1.deps.iName != '\0' && *$3.deps.iName == '\0') ) {
         strcpy($$.deps.iName, $1.deps.iName);
+        $$.deps.has_a = $1.deps.has_a;
+        $$.deps.a = $1.deps.a;
         $$.deps.c = $3.deps.c;
-        $3.deps.has_c = 1;
+        $3.deps.has_c = $3.deps.has_c;
       } else if ( (*$1.deps.iName == '\0' && *$3.deps.iName != '\0') ) {
         strcpy($$.deps.iName, $3.deps.iName);
+        $$.deps.has_a = $3.deps.has_a;
+        $$.deps.a = $3.deps.a;
         $$.deps.c = $1.deps.c;
-        $1.deps.has_c = 1;
+        $1.deps.has_c = $1.deps.has_c;
       }
+
+      /* printf("\n\na:%d c: %d\n\n", $3.deps.a, $3.deps.c); */
 
       initDequeue(&$$.vars);
       char *str;
@@ -430,7 +467,6 @@ exp : exp '+' exp {
       if (!$3.deps.is_arr)
         $$.deps.c = - $3.deps.c;
       strcpy($$.deps.iName, $1.deps.iName);
-      $$.deps.has_i = $1.deps.has_i;
     }
     | exp '*' exp {
       int newReg = NextRegister();
@@ -450,10 +486,35 @@ exp : exp '+' exp {
 
       initDequeue(&$$.vars);
       char *str;
-      while( (str = rdequeue(&$1.vars) ) != NULL )
-        linsert(&$$.vars, str);
-      while( (str = rdequeue(&$3.vars) ) != NULL )
-        linsert(&$$.vars, str);
+      APPEND_DEQ(str, &$$.vars, &$1.vars);
+      APPEND_DEQ(str, &$$.vars, &$3.vars);
+
+      if ( $1.deps.is_arr || $3.deps.is_arr) {
+        initDequeue(&$$.arrExprs);
+        if ( $1.deps.is_arr ) {
+          linsert(&$$.arrExprs, &$1.deps);
+        }
+        if ( $3.deps.is_arr ) {
+          linsert(&$$.arrExprs, &$3.deps);
+        }
+      }
+
+      $$.deps.is_constant = $1.deps.is_constant && $3.deps.is_constant;
+      if ($1.deps.is_constant && !$3.deps.is_constant) {
+        $$.deps.has_a = 1;
+        $$.deps.a = $1.deps.c;
+        $$.deps.has_c = 0;
+        $$.deps.c = 0;
+        strcpy($$.deps.iName, $3.deps.iName);
+      } else if (!$1.deps.is_constant && $3.deps.is_constant) {
+        $$.deps.has_a = 1;
+        $$.deps.a = $3.deps.c;
+        $$.deps.has_c = 0;
+        $$.deps.c = 0;
+        strcpy($$.deps.iName, $1.deps.iName);
+      }
+
+      /* printf("\n\na: %d, c: %d, iName: %s\n\n", $$.deps.a, $$.deps.c, $$.deps.iName); */
     }
 
     | exp AND exp {
@@ -547,15 +608,18 @@ exp : exp '+' exp {
       emit(NOLABEL, LOAD, $$.targetRegister, newReg, EMPTY);
       $$.targetRegister = newReg;
 
-      char *str;
-      initDequeue(&$$.vars);
-      while ( (str = rdequeue(&$3.vars) ) != NULL )
-        linsert(&$$.vars, str);
-      rinsert(&$$.vars, str);
-
       memcpy(&$$.deps, &$3.deps, sizeof(struct arrDeps));
       strcpy($$.deps.arrName, $1.str);
       $$.deps.is_arr = 1;
+
+      char *str;
+      initDequeue(&$$.vars);
+      APPEND_DEQ(str, &$$.vars, &$3.vars);
+      rinsert(&$$.vars, $1.str);
+      initDequeue(&$$.arrExprs);
+      struct arrDeps *tempDeps = malloc(sizeof(struct arrDeps));
+      memcpy(tempDeps, &$$.deps, sizeof(struct arrDeps));
+      rinsert(&$$.arrExprs, tempDeps);
     }
 
 

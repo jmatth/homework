@@ -52,10 +52,10 @@ typedef enum class_expression {
 struct arrDeps {
     int is_arr;
     int is_constant;
-    int has_i;
-    int i;
     int has_c;
     int c;
+    int has_a;
+    int a;
     char iName[64];
     char arrName[64];
 };
