@@ -10,7 +10,7 @@
 extern
 FILE *depstats;
 
-extern 
+extern
 char *CommentBuffer;
 
 extern

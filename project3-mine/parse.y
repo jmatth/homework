@@ -7,6 +7,7 @@
 int yylex();
 void yyerror(char * s);
 #include "symtab.h"
+#include "deptest.h"
 #include <string.h>
 
 FILE *outfile;
@@ -233,7 +234,7 @@ fstmt : FOR ctrlexp DO
 
             canVector = 1;
             while ( (str = rdequeue(&($4.rhs->vars))) != NULL ) {
-              printf("\n checking %s against %s\n", str, $4.lhs->varName);
+              /* printf("\n checking %s against %s\n", str, $4.lhs->varName); */
               if ( strcmp(str, $4.lhs->varName) == 0) {
                 /* printf("Found possible dependency on %s\n", str); */
                 canVector = 0;
@@ -241,51 +242,51 @@ fstmt : FOR ctrlexp DO
               }
             }
 
-            if (!canVector) {
-              if (!$4.lhs->deps.is_arr) {
-                printf("\nlhs not an array\n");
-                canVector = 0;
-              } else {
-                printf("\nSIV and ZIV\n");
-                struct arrDeps *rhsDeps;
-                int c1 = $4.lhs->deps.c;
-                int a = $4.lhs->deps.a;
-                double d;
-                if (! $4.rhs->deps.has_a)
-                  a = 1;
-                while ( (rhsDeps = rdequeue(&$4.rhs->arrExprs)) != NULL ) {
-                  if (rhsDeps->is_constant) {
-                    // ZIV
-                    int c2 = rhsDeps->c;
-                    printf("\nZIV with c1=%d c2=%d\n", c1, c2);
-                    if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
-                      canVector = 0;
-                      break;
-                    } else {
-                      canVector = 1;
-                    }
-                  } else {
-                    // SIV
-                    int c2 = rhsDeps->c;
-                    if (rhsDeps->a != a) {
-                      canVector = 0;
-                      break;
-                    }
+            if (!$4.lhs->deps.is_arr) {
+              emitFoundOutputDependence($4.lhs->varName);
+            }
+            else if (!canVector) {
+              struct arrDeps *rhsDeps;
+              int c1 = $4.lhs->deps.c;
+              int a = $4.lhs->deps.a;
+              double d;
+              if (! $4.rhs->deps.has_a)
+                a = 1;
+              canVector = 1;
+              while ( (rhsDeps = rdequeue(&$4.rhs->arrExprs)) != NULL ) {
+                if (rhsDeps->is_constant) {
+                  // ZIV
+                  int c2 = rhsDeps->c;
+                  /* printf("\nZIV with c1=%d c2=%d\n", c1, c2); */
+                  if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
+                    emitAssumeTrueDependence($4.lhs->varName);
+                    canVector = 0;
+                  }
+                } else {
+                  // SIV
+                  int c2 = rhsDeps->c;
+                  if (rhsDeps->a != a) {
+                    canVector = 0;
+                  }
 
-                    d = ((double)(c1 - c2)) / (double)a;
-                    printf("\nSIV with c1=%d c2=%d, a=%d, d=%f\n", c1, c2, a, d);
-                    if (d == (int)d && d <= $2.endRange - $2.startRange) {
-                      // dependence with distance d
-                      canVector = 0;
-                      break;
-                    } else {
-                      canVector = 1;
-                    }
+                  d = ((double)(c1 - c2)) / (double)a;
+                  /* printf("\nSIV with c1=%d c2=%d, a=%d, d=%f\n", c1, c2, a, d); */
+                  if (d == (int)d && d <= $2.endRange - $2.startRange) {
+                    // dependence with distance d
+                    emitFoundTrueDependenceWithDistance($4.lhs->varName, d);
+                    canVector = 0;
                   }
                 }
               }
+              }
             }
-            printf("\ncanVector: %d\n", canVector);
+            if (canVector) {
+              emitFoundNoDependenciesAndWillVectorize();
+            } else {
+              emitFoundDependenciesAndWillNotVectorize();
+            }
+            }
+            /* printf("\ncanVector: %d\n", canVector); */
           } else {
             printf("rhs is null\n");
           }
