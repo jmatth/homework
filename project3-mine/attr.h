@@ -75,6 +75,7 @@ typedef struct regInfo {
     char varName[64];
     struct Dequeue vars;
     struct Dequeue arrExprs;
+    struct regInfo *rhsDq;
 } regInfo;
 
 typedef struct {
@@ -94,5 +95,9 @@ typedef struct {
 #define ERR_OPERAND_NOT_BOOLEAN "\n*** ERROR ***: Operand type must be boolean.\n"
 #define ERR_EQUALS_WITH_DIFFERENT_TYPES "\n*** ERROR ***: == or != operator with different types.\n"
 #define ERR_RELATIONAL_ILLEGAL_TYPE "\n*** ERROR ***: Relational operator with illegal type.\n"
+
+#define APPEND_DEQ(temp, indequeue, outdequeue) \
+    while ( (temp = rdequeue(outdequeue)) != NULL ) \
+        linsert(indequeue, temp);
 
 #endif

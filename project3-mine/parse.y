@@ -239,23 +239,20 @@ fstmt : FOR ctrlexp DO
                 printf("\nlhs not an array\n");
                 canVector = 0;
               } else {
-                /* printf("\nLHS: C: %d, i: %s,\nRHS: C: %d\n", */
-                /*        $4.lhs->deps.c, $4.lhs->deps.iName, */
-                /*        $4.rhs->deps.c); */
-                // ZIV
-                if ($4.rhs->deps.is_constant) {
-                  int c2 = $4.rhs->deps.c;
-                  int c1 = $4.lhs->deps.c;
-                  if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
-                    canVector = 0;
-                  } else {
-                    canVector = 1;
-                    printf("VECTORING");
+                struct arrDeps *rhsDeps;
+                while ( (rhsDeps = rdequeue(&$4.rhs->arrExprs)) != NULL ) {
+                  // ZIV
+                  if (rhsDeps->is_constant) {
+                    int c2 = rhsDeps->c;
+                    int c1 = $4.lhs->deps.c;
+                    if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
+                      canVector = 0;
+                      break;
+                    }
                   }
-                } else {
-                  canVector = 0;
                 }
               }
+              printf("\ncanVector: %d\n", canVector);
             }
           } else {
             printf("rhs is null\n");
@@ -372,12 +369,11 @@ exp : exp '+' exp {
       );
 
       if ( $1.deps.is_arr || $3.deps.is_arr) {
+        initDequeue(&$$.arrExprs);
         if ( $1.deps.is_arr ) {
-          initDequeue(&$$.arrExprs);
           linsert(&$$.arrExprs, &$1.deps);
         }
         if ( $3.deps.is_arr ) {
-          initDequeue(&$$.arrExprs);
           linsert(&$$.arrExprs, &$3.deps);
         }
       }
@@ -416,14 +412,23 @@ exp : exp '+' exp {
 
       initDequeue(&$$.vars);
       char *str;
-      while( (str = rdequeue(&$1.vars) ) != NULL )
-        linsert(&$$.vars, str);
-      while( (str = rdequeue(&$3.vars) ) != NULL )
-        linsert(&$$.vars, str);
+      APPEND_DEQ(str, &$$.vars, &$1.vars);
+      APPEND_DEQ(str, &$$.vars, &$3.vars);
+
+      if ( $1.deps.is_arr || $3.deps.is_arr) {
+        initDequeue(&$$.arrExprs);
+        if ( $1.deps.is_arr ) {
+          linsert(&$$.arrExprs, &$1.deps);
+        }
+        if ( $3.deps.is_arr ) {
+          linsert(&$$.arrExprs, &$3.deps);
+        }
+      }
 
       $$.deps.is_constant = $1.deps.is_constant && $3.deps.is_constant;
       $$.deps.has_c = $1.deps.has_c + $3.deps.has_c;
-      $$.deps.c = - $3.deps.c;
+      if (!$3.deps.is_arr)
+        $$.deps.c = - $3.deps.c;
       strcpy($$.deps.iName, $1.deps.iName);
       $$.deps.has_i = $1.deps.has_i;
     }
