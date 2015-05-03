@@ -273,11 +273,8 @@ fstmt : FOR ctrlexp DO
                   emitAssumeTrueDependence(rhsDeps->arrName);
                 } else if (rhsDeps->iName[0] != '\0' && strcmp(rhsDeps->iName, $2.inductionName) != 0) {
                   canVector = 0;
-                  printf("\n\ninduction names don't match: %s, %s\n\n", $2.inductionName, rhsDeps->iName);
-                  /* emitAssumeTrueDependence(rhsDeps->arrName); */
-                }
-
-                if (rhsDeps->is_constant) {
+                  emitAssumeTrueDependence(rhsDeps->arrName);
+                } else if (rhsDeps->is_constant) {
                   // ZIV
                   if ($4.lhs->deps.has_a) {
                     canVector = 0;
@@ -297,6 +294,7 @@ fstmt : FOR ctrlexp DO
                   int c2 = rhsDeps->c;
                   if (rhsDeps->a != a) {
                     canVector = 0;
+                    emitAssumeTrueDependence($4.lhs->varName);
                   }
 
                   d = ((double)(c1 - c2)) / (double)a;
@@ -314,7 +312,6 @@ fstmt : FOR ctrlexp DO
             } else {
               emitFoundDependenciesAndWillNotVectorize();
             }
-            /* printf("\ncanVector: %d\n", canVector); */
           }
 
           // turn vectorization on or off
