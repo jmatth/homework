@@ -256,6 +256,11 @@ fstmt : FOR ctrlexp DO
               while ( (rhsDeps = rdequeue(&$4.rhs->arrExprs)) != NULL ) {
                 if (rhsDeps->is_constant) {
                   // ZIV
+                  if ($4.lhs->deps.has_a) {
+                    canVector = 0;
+                    emitAssumeTrueDependence(rhsDeps->arrName);
+                    continue;
+                  }
                   int c2 = rhsDeps->c;
                   /* printf("\nZIV with c1=%d c2=%d\n", c1, c2); */
                   if ( c2 - c1 >= $2.startRange && c2 - c1 <= $2.endRange ) {
@@ -264,6 +269,8 @@ fstmt : FOR ctrlexp DO
                   }
                 } else {
                   // SIV
+                  if (!rhsDeps->has_a)
+                    rhsDeps->a = 1;
                   int c2 = rhsDeps->c;
                   if (rhsDeps->a != a) {
                     canVector = 0;
@@ -278,13 +285,11 @@ fstmt : FOR ctrlexp DO
                   }
                 }
               }
-              }
             }
             if (canVector) {
               emitFoundNoDependenciesAndWillVectorize();
             } else {
               emitFoundDependenciesAndWillNotVectorize();
-            }
             }
             /* printf("\ncanVector: %d\n", canVector); */
           } else {
