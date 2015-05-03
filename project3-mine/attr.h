@@ -51,6 +51,7 @@ typedef enum class_expression {
 
 struct arrDeps {
     int is_arr;
+    int nested_arrs;
     int is_constant;
     int has_c;
     int c;
@@ -73,6 +74,7 @@ typedef struct regInfo {
     struct regInfo *lhs;
     struct regInfo *rhs;
     char varName[64];
+    char inductionName[64];
     struct Dequeue vars;
     struct Dequeue arrExprs;
     struct regInfo *rhsDq;

@@ -233,19 +233,29 @@ fstmt : FOR ctrlexp DO
             /* printf("rhs dequeue left str: %s", (char*)$4.rhs->vars.left->data); */
 
             canVector = 1;
+            int namesMatch = 0;
             while ( (str = rdequeue(&($4.rhs->vars))) != NULL ) {
               /* printf("\n checking %s against %s\n", str, $4.lhs->varName); */
               if ( strcmp(str, $4.lhs->varName) == 0) {
                 /* printf("Found possible dependency on %s\n", str); */
                 canVector = 0;
+                namesMatch = 1;
                 break;
               }
             }
 
             if (!$4.lhs->deps.is_arr) {
               emitFoundOutputDependence($4.lhs->varName);
+              canVector = 0;
+            } else if ($4.lhs->deps.nested_arrs) {
+              emitAssumeOutputDependence($4.lhs->varName);
+              canVector = 0;
+            } else if (strcmp($4.lhs->deps.iName, $2.inductionName) != 0) {
+              emitAssumeOutputDependence($4.lhs->varName);
+              canVector = 0;
             }
-            else if (!canVector) {
+
+            if (namesMatch) {
               struct arrDeps *rhsDeps;
               int c1 = $4.lhs->deps.c;
               int a = $4.lhs->deps.a;
@@ -254,6 +264,19 @@ fstmt : FOR ctrlexp DO
                 a = 1;
               canVector = 1;
               while ( (rhsDeps = rdequeue(&$4.rhs->arrExprs)) != NULL ) {
+
+                if (strcmp(rhsDeps->arrName, $4.lhs->varName) != 0)
+                  continue;
+
+                if (rhsDeps->nested_arrs) {
+                  canVector = 0;
+                  emitAssumeTrueDependence(rhsDeps->arrName);
+                } else if (rhsDeps->iName[0] != '\0' && strcmp(rhsDeps->iName, $2.inductionName) != 0) {
+                  canVector = 0;
+                  printf("\n\ninduction names don't match: %s, %s\n\n", $2.inductionName, rhsDeps->iName);
+                  /* emitAssumeTrueDependence(rhsDeps->arrName); */
+                }
+
                 if (rhsDeps->is_constant) {
                   // ZIV
                   if ($4.lhs->deps.has_a) {
@@ -292,8 +315,6 @@ fstmt : FOR ctrlexp DO
               emitFoundDependenciesAndWillNotVectorize();
             }
             /* printf("\ncanVector: %d\n", canVector); */
-          } else {
-            printf("rhs is null\n");
           }
 
           // turn vectorization on or off
@@ -381,6 +402,7 @@ lhs : ID {
 
       memcpy(&$$.deps, &$3.deps, sizeof(struct arrDeps));
       $$.deps.is_arr = 1;
+      $$.deps.nested_arrs = $3.deps.is_arr;
 
       format_comment("Load LHS value of array variable \"%s\" with based address %d",
                       $1.str, var->offset);
@@ -616,7 +638,9 @@ exp : exp '+' exp {
 
       memcpy(&$$.deps, &$3.deps, sizeof(struct arrDeps));
       strcpy($$.deps.arrName, $1.str);
+      strcpy($$.deps.iName, $3.deps.iName);
       $$.deps.is_arr = 1;
+      $$.deps.nested_arrs = $3.deps.is_arr;
 
       char *str;
       initDequeue(&$$.vars);
@@ -681,6 +705,7 @@ ctrlexp : ID ASG ICONST ',' ICONST {
           $$.vectLabel = vectLabel;
           $$.startRange = $3.num;
           $$.endRange = $5.num;
+          strcpy($$.inductionName, $1.str);
 
           //Initialize the LCV
           emit(NOLABEL, LOADI, $3.num - 1, tmpReg, EMPTY);
