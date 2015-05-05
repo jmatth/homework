@@ -399,7 +399,7 @@ lhs : ID {
 
       memcpy(&$$.deps, &$3.deps, sizeof(struct arrDeps));
       $$.deps.is_arr = 1;
-      $$.deps.nested_arrs = $3.deps.is_arr;
+      $$.deps.nested_arrs = $3.deps.is_arr || $3.deps.nested_arrs;
 
       format_comment("Load LHS value of array variable \"%s\" with based address %d",
                       $1.str, var->offset);
@@ -445,6 +445,8 @@ exp : exp '+' exp {
         $$.deps.a = $3.deps.a;
         $$.deps.c = $1.deps.c;
         $1.deps.has_c = $1.deps.has_c;
+      } else {
+        $$.deps.nested_arrs = 1;
       }
 
       /* printf("\n\na:%d c: %d\n\n", $3.deps.a, $3.deps.c); */
@@ -485,6 +487,10 @@ exp : exp '+' exp {
         if ( $3.deps.is_arr ) {
           linsert(&$$.arrExprs, &$3.deps);
         }
+      }
+
+      if ( ! ($1.deps.is_constant | $1.deps.is_constant) ) {
+        $$.deps.nested_arrs = 1;
       }
 
       $$.deps.is_constant = $1.deps.is_constant && $3.deps.is_constant;
@@ -537,6 +543,10 @@ exp : exp '+' exp {
         $$.deps.has_c = 0;
         $$.deps.c = 0;
         strcpy($$.deps.iName, $1.deps.iName);
+      }
+
+      if ( ! ($1.deps.is_constant | $1.deps.is_constant) ) {
+        $$.deps.nested_arrs = 1;
       }
 
       /* printf("\n\na: %d, c: %d, iName: %s\n\n", $$.deps.a, $$.deps.c, $$.deps.iName); */
