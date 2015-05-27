@@ -1,0 +1,3 @@
+I reused my code from project 2, which included modifications to symtab.h and
+symtab.c. I have included these modified files in the tar archive, please use
+those as it will not compile with the versions provided with the example code.

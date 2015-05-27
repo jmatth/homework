@@ -1,0 +1,20 @@
+digraph divisible_by_eight {
+  rankdir=LR;
+  size="8,5"
+
+  s_0 [shape=circle]
+  s_1 [shape=doublecircle]
+  s_2 [shape=circle]
+  s_3 [shape=doublecircle]
+  s_4 [shape=doublecircle]
+
+  s_0 -> s_1 [label="c"]
+
+  s_1 -> s_2 [label="a"]
+  s_2 -> s_3 [label="b"]
+  s_3 -> s_2 [label="a"]
+
+
+  s_1 -> s_4 [label="d"]
+}
+

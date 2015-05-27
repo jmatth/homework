@@ -1,0 +1,15 @@
+program main;
+var a, b: integer;
+    i: boolean;
+    c: array[1] of integer;
+begin
+  a := 1;
+  b := 10;
+  for i:=1,100 do
+  begin
+    a := a + 2;
+    b := b + 1
+  end	
+  endfor;
+  print(a)
+end.

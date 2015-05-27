@@ -1,0 +1,19 @@
+program main;
+var
+  i: integer;
+  k: integer;
+  b: array[10] of integer;
+  a: array[10] of integer;
+begin
+  k := 5;
+  b[0] := 1;
+  print(b[0]);
+  for i:= 1,8 do
+    b[i + k] := b[0]
+  endfor;
+
+  for i:=1,9 do
+    print (b[i])
+  endfor
+
+end.

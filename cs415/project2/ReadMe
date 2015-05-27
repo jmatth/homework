@@ -1,0 +1,4 @@
+Example call of compiler:
+
+
+ ./codegen < testcases/demo1

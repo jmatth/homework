@@ -1,0 +1,14 @@
+All the allocator logic lives in the iloc module. Inside this module are two files:
+
+  - __init__.py: contains the 3 main algorithms and some helper methods
+
+  - instruction.py: contains class definitions to represent iloc instructions,
+    registers, etc.
+
+
+The executable file alloc is a driver that processes user input, checks it for
+any errors, and invokes the specified algorithm from the iloc module. It takes
+command-line arguments as specified in the project description. Since python is
+an interpreted language, no compilation is necessary. However, the alloc program
+does rely on the code inside the iloc module, so moving it to a new location
+without also moving the directory "iloc" will cause it to fail.
