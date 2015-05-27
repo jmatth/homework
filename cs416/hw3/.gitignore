@@ -1,0 +1,4 @@
+part1
+*.o
+test
+mypthread-sort
